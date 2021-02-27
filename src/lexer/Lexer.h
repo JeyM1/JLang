@@ -21,6 +21,7 @@ class Lexer
 
 		Other
 	};
+	static const std::map<ClassOfChar, std::string> charClasses;
 
 	struct LineToken {
 		Token token;
@@ -30,6 +31,8 @@ class Lexer
 	};
 
 	static const std::map<std::string, Token::Type> languageTokens;
+	static const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> stateTransitionFn;
+	static const unsigned int initialState{0};
 
   protected:
 	std::vector<LineToken> _tokens;
@@ -39,7 +42,7 @@ class Lexer
 	Lexer();
 
 	void lex(std::istream&) noexcept;
-
+	static ClassOfChar classOfChar(char);
 
 
 };

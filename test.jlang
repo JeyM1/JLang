@@ -10,6 +10,6 @@ program Program1 {
     if(c) {
 	    print(b);
     } else {
-	    print(a);
-	}
+        print(a);
+    }
 }
