@@ -41,13 +41,15 @@ class Token
 		FEOF,
 		Unexpected
 	};
+
+	static const std::map<const std::string, Token::Type> languageTokens;
+
   protected:
 	Token::Type _type;
-	std::string_view _lexeme;
+	std::string _lexeme;
 
   public:
-	explicit Token( Type type );
-	Token( Type type, const std::string_view& lexeme );
+	Token( Type type, std::string  lexeme );
 
 	Type type() const noexcept { return _type; }
 	void setType( Type t ) noexcept { _type = t; }
@@ -62,6 +64,8 @@ class Token
 	bool is_one_of( Type t1, Type t2, Ts... ts ) const noexcept {
 		return is( t1 ) || is_one_of( t2, ts... );
 	}
+
+	static Token getLanguageToken(const std::string&);
 
 };
 

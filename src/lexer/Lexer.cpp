@@ -7,78 +7,84 @@
 #include <sstream>
 #include "Lexer.h"
 
-using Type = Token::Type;
 using ClassOfChar = Lexer::ClassOfChar;
 
 const std::map<ClassOfChar, std::string> Lexer::charClasses = {
-	{Letter, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"},
-	{Digit, "0123456789"},
-	{Whitespace, " \t"},
-	{Newline, "\r\n"},
-};
-
-const std::map<std::string, Type> Lexer::languageTokens = {
-	{ "program", Type::Keyword },
-	{ "int", Type::Keyword },
-	{ "real", Type::Keyword },
-	{ "bool", Type::Keyword },
-	{ "read", Type::Keyword },
-	{ "print", Type::Keyword },
-	{ "for", Type::Keyword },
-	{ "by", Type::Keyword },
-	{ "while", Type::Keyword },
-	{ "do", Type::Keyword },
-	{ "if", Type::Keyword },
-	{ "then", Type::Keyword },
-	{ "else", Type::Keyword },
-	{ "=", Type::Assign },
-	{ "+", Type::Add },
-	{ "-", Type::Sub },
-	{ "*", Type::Multiply },
-	{ "/", Type::Division },
-	{ "//", Type::IntDivision },
-	{ "**", Type::Power },
-	{ "<", Type::LessThan },
-	{ "<=", Type::LessOrEqualTo },
-	{ "==", Type::EqualTo },
-	{ ">=", Type::GreaterOrEqualTo },
-	{ ">", Type::GreaterThan },
-	{ "!=", Type::NotEqual },
-	{ "(", Type::LeftParen },
-	{ ")", Type::RightParen },
-	{ "{", Type::LeftCurly },
-	{ "}", Type::RightCurly },
-	{ ".", Type::Punct },
-	{ ",", Type::Punct },
-	{ ":", Type::Punct },
-	{ ";", Type::Semicolon },
-	{ " ", Type::Whitespace },
-	{ "\t", Type::Whitespace },
-	{ "\n", Type::EOL },
-	{ "\r\n", Type::EOL },
-	{ "\0", Type::FEOF },
+	{ Letter, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" },
+	{ Digit, "0123456789" },
+	{ Whitespace, " \t" },
+	{ Newline, "\r\n" },
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
 	// Identifier
 	{{ 0, Letter }, 1 },
-	{{ 1, Letter }, 2 },
-	{{ 1, Digit }, 2 }
+	{{ 1, Letter }, 1 },
+	{{ 1, Digit }, 1 },
+	{{ 1, Other }, 2 },
+
+	{{ 0, Whitespace }, 0 }
+
+};
+
+const std::map<
+	unsigned int,
+	std::function<void( std::istream& in, std::stringstream& lexeme, char currChar, unsigned int currLine )>
+> Lexer::finalStateProcessingFunctions = {
+	{ 2, []( std::istream& in, std::stringstream& lexeme, char currChar, unsigned int currLine ) {
+	  Token token = Token::getLanguageToken( lexeme.str());
+	  if (token.is( Token::Unexpected )) {
+		  // token is not Language-in, its identifier
+		  // TODO: insert into tables
+	  }
+
+	  in.unget();
+	}}
 };
 
 Lexer::LineToken::LineToken( const Token& token ) : token( token ) {}
 Lexer::Lexer() {}
-void Lexer::lex( std::istream& inpStream ) noexcept {
+bool Lexer::lex( std::istream& inpStream ) noexcept {
+	bool isSuccess = true;
 	unsigned int currState = Lexer::initialState;
 	unsigned int currLine = 1;
 	std::stringstream lexeme;
 	for (char ch; (ch = inpStream.get()) != EOF;) {
-
-		std::cout << ch << std::endl;
+		ClassOfChar charClass = classOfChar( ch );
+		std::cout << "class = " << charClass;
+		std::cout << " | char = \"" << ch;
+		std::cout << "\" | state = " << currState << std::endl;
+		try {
+			currState = stateTransitionFn.at( std::make_pair( currState, charClass ));
+			std::cout << "Changed state to: " << currState << std::endl;
+		}
+		catch (std::exception& e) {
+			std::cout << "Could not change state to ..., changing to other" << std::endl;
+			currState = stateTransitionFn.at( std::make_pair( currState, Other ));
+		}
+		bool isStateFinal = finalStateProcessingFunctions.find( currState ) != finalStateProcessingFunctions.end();
+		if (isStateFinal) {
+			// call processing fn
+			std::cout << "State is final, calling processing func.." << std::endl;
+			finalStateProcessingFunctions.at( currState )( inpStream, lexeme, ch, currLine );
+			currState = initialState;
+		}
+		else if (currState == initialState) {
+			lexeme.str( std::string{} );
+		}
+		else {
+			lexeme.put( ch );
+			std::cout << "Changed lexeme to: " << lexeme.str() << std::endl;
+		}
 	}
+
+	return isSuccess;
 }
 ClassOfChar Lexer::classOfChar( char ch ) {
-	if (letters.find( ch ) > 0)
-		return Letter;
+	for (int charClassInt = 0; charClassInt < ClassOfChar::Other; charClassInt++) {
+		auto cls = static_cast<ClassOfChar>(charClassInt);
+		if (charClasses.at( cls ).find( ch ) != std::string::npos)
+			return cls;
+	}
 	return Other;
 }
