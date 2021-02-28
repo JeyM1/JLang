@@ -64,3 +64,7 @@ Token Token::getLanguageToken(const std::string& lexeme) {
 	}
 	return Token( Unexpected, lexeme);
 }
+std::ostream& operator<<( std::ostream& os, const Token& token ) {
+	os << "type: " << token._type << " lexeme: " << token._lexeme;
+	return os;
+}

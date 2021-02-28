@@ -6,6 +6,7 @@
 #define _TOKEN_H_
 
 #include <string_view>
+#include <ostream>
 
 class Token
 {
@@ -66,6 +67,7 @@ class Token
 	}
 
 	static Token getLanguageToken(const std::string&);
+	friend std::ostream& operator<<( std::ostream& os, const Token& token );
 
 };
 

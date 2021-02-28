@@ -26,27 +26,27 @@ class Lexer
 	struct LineToken
 	{
 		Token token;
-		unsigned int line{};
+		unsigned int line;
 
-		LineToken( const Token& token );
+		explicit LineToken( unsigned int, Token token );
 	};
 
 	static const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> stateTransitionFn;
 	static const unsigned int initialState{ 0 };
 	static const std::map<
 		unsigned int,
-		std::function<void( std::istream& in, std::stringstream& lexeme, char currChar, unsigned int currLine )>
+		std::function<void( std::istream&, const std::string&, char, unsigned int, Lexer& )>
 	> finalStateProcessingFunctions;
 
-  protected:
-	std::vector<LineToken> _tokens;
-	std::map<std::string_view, int> _identifierIds;
+	std::vector<LineToken> tokens;
+	std::vector<std::string> identifiers;
 
   public:
 	Lexer();
 
 	bool lex( std::istream& ) noexcept;
 	static ClassOfChar classOfChar( char );
+	void printTokenTable();
 
 };
 
