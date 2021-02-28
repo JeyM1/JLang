@@ -25,7 +25,16 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	{{ 1, Digit }, 1 },
 	{{ 1, Other }, 2 },
 
-	{{ 0, Whitespace }, 0 }
+	// IntConst
+	{{ 1, Other }, 2 },
+	{{ 1, Other }, 2 },
+	{{ 1, Other }, 2 },
+
+	{{ 0, Whitespace }, 0 },
+
+	// Unexpected
+	{{ 0, Other }, 101 },
+
 
 };
 
@@ -53,6 +62,13 @@ const std::map<
 	  }
 	},
 
+	{ 101,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance ) {
+		std::cout << "DEBUG: found unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
+		instance.tokens.emplace_back(currLine, Token{Token::Type::Unexpected, lexeme + currChar});
+	  }
+	},
+
 };
 
 Lexer::LineToken::LineToken( unsigned int line, Token token ) : line(line), token(std::move(token)) {}
@@ -74,6 +90,7 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 		catch (std::exception& e) {
 			try {
 				currState = stateTransitionFn.at(std::make_pair(currState, Other));
+				std::cout << "Changed state by Other to: " << currState << std::endl;
 			}
 			catch (...) {
 				std::cerr << "No state to go from" << std::endl;
@@ -81,10 +98,11 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 				// TODO: change to unexpected token
 			}
 		}
-		bool isStateFinal = finalStateProcessingFunctions.find(currState) != finalStateProcessingFunctions.end();
+		bool isStateFinal = finalStateProcessingFunctions.count(currState) > 0;
 		if (isStateFinal) {
 			// call processing fn
-			std::cout << "State is final, calling processing func.." << std::endl;
+			std::cout << "State " << currState << " is final, calling processing func" << std::endl;
+
 			finalStateProcessingFunctions.at(currState)(inpStream, lexeme.str(), ch, currLine, *this);
 			currState = initialState;
 		}
