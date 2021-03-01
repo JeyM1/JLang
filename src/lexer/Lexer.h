@@ -19,6 +19,7 @@ class Lexer
 		Digit,
 		Whitespace,
 		Newline,
+		Dot,
 		Other
 	};
 	static const std::map<ClassOfChar, std::string> charClasses;
@@ -35,7 +36,7 @@ class Lexer
 	static const unsigned int initialState{ 0 };
 	static const std::map<
 		unsigned int,
-		std::function<void( std::istream&, const std::string&, char, unsigned int, Lexer& )>
+		std::function<void( std::istream&, const std::string&, char, unsigned int&, Lexer& )>
 	> finalStateProcessingFunctions;
 
 	std::vector<LineToken> tokens;

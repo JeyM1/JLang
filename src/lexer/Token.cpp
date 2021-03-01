@@ -41,15 +41,15 @@ const std::map<const std::string, Type> Token::languageTokens = {
 	{ ")", Type::RightParen },
 	{ "{", Type::LeftCurly },
 	{ "}", Type::RightCurly },
-	{ ".", Type::Punct },
-	{ ",", Type::Punct },
-	{ ":", Type::Punct },
+//	{ ".", Type::Punct },
+//	{ ",", Type::Punct },
+//	{ ":", Type::Punct },
 	{ ";", Type::Semicolon },
-	{ " ", Type::Whitespace },
-	{ "\t", Type::Whitespace },
-	{ "\n", Type::EOL },
-	{ "\r\n", Type::EOL },
-	{ "\0", Type::FEOF },
+//	{ " ", Type::Whitespace },
+//	{ "\t", Type::Whitespace },
+//	{ "\n", Type::EOL },
+//	{ "\r\n", Type::EOL },
+//	{ "\0", Type::FEOF },
 };
 
 Token::Token( Token::Type type, std::string lexeme ) : _type( type ), _lexeme(std::move( lexeme )) {}

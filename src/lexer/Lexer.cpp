@@ -16,6 +16,7 @@ const std::map<ClassOfChar, std::string> Lexer::charClasses = {
 	{ Digit, "0123456789" },
 	{ Whitespace, " \t" },
 	{ Newline, "\r\n" },
+	{ Dot, "." },
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
@@ -25,47 +26,83 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	{{ 1, Digit }, 1 },
 	{{ 1, Other }, 2 },
 
-	// IntConst
-	{{ 1, Other }, 2 },
-	{{ 1, Other }, 2 },
-	{{ 1, Other }, 2 },
+	// UnsignedReal
+	{{ 0, Digit }, 3 },
+	{{ 3, Digit }, 3 },
+	// if UnsignedInt
+	{{ 3, Other }, 8 },
+	{{ 3, Dot }, 4 },
+	{{ 4, Digit }, 4 },
+	{{ 4, Other }, 5 },
+	{{ 0, Dot }, 6 },
+	{{ 6, Digit }, 4 },
+	//
 
+
+	// Whitespace
 	{{ 0, Whitespace }, 0 },
+
+	// NewLine
+	{{0, Newline}, 9},
 
 	// Unexpected
 	{{ 0, Other }, 101 },
-
 
 };
 
 const std::map<
 	unsigned int,
-	std::function<void( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance )>
+	std::function<void( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance )>
 > Lexer::finalStateProcessingFunctions = {
 	{ 2,
-	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance ) {
-		Token token = Token::getLanguageToken(lexeme);
-		if (token.is(Token::Unexpected)) {
-			// token is not Language-in, its identifier
-			// TODO: insert into tables
-			auto it = std::find(instance.identifiers.begin(), instance.identifiers.end(), lexeme);
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    Token token = Token::getLanguageToken(lexeme);
+	    if (token.is(Token::Unexpected)) {
+		    // token is not Language-in, its identifier
+		    auto it = std::find(instance.identifiers.begin(), instance.identifiers.end(), lexeme);
+		    if (it == instance.identifiers.end()) {
+			    // not found identifier in table
+			    instance.identifiers.push_back(lexeme);
+		    }
 
-			if (it == instance.identifiers.end()) {
-				// not found identifier in table
-				instance.identifiers.push_back(lexeme);
-			}
-
-			token = Token{ Token::Type::Identifier, lexeme };
-		}
-		instance.tokens.emplace_back(currLine, token);
-		in.unget();
+		    token = Token{ Token::Type::Identifier, lexeme };
+	    }
+	    instance.tokens.emplace_back(currLine, token);
+	    in.unget();
 	  }
 	},
 
+	// UnsignedReal
+	{ 5,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    Token token{ Token::Type::UnsignedReal, lexeme };
+	    instance.tokens.emplace_back(currLine, token);
+	    in.unget();
+	  }
+	},
+
+	// UnsignedInt
+	{ 8,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    Token token{ Token::Type::UnsignedInt, lexeme };
+	    instance.tokens.emplace_back(currLine, token);
+	    in.unget();
+	  }
+	},
+
+	// Newline
+	{ 9,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+		currLine++;
+	  }
+	},
+
+
+	// Error state
 	{ 101,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance ) {
-		std::cout << "DEBUG: found unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
-		instance.tokens.emplace_back(currLine, Token{Token::Type::Unexpected, lexeme + currChar});
+	    std::cout << "DEBUG: found unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
+	    instance.tokens.emplace_back(currLine, Token{ Token::Type::Unexpected, lexeme + currChar });
 	  }
 	},
 
@@ -73,6 +110,7 @@ const std::map<
 
 Lexer::LineToken::LineToken( unsigned int line, Token token ) : line(line), token(std::move(token)) {}
 Lexer::Lexer() {}
+
 bool Lexer::lex( std::istream& inpStream ) noexcept {
 	bool isSuccess = true;
 	unsigned int currState = Lexer::initialState;
@@ -93,7 +131,7 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 				std::cout << "Changed state by Other to: " << currState << std::endl;
 			}
 			catch (...) {
-				std::cerr << "No state to go from" << std::endl;
+				std::cerr << "No state to go from " << currState << std::endl;
 				isSuccess = false;
 				// TODO: change to unexpected token
 			}
@@ -105,6 +143,7 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 
 			finalStateProcessingFunctions.at(currState)(inpStream, lexeme.str(), ch, currLine, *this);
 			currState = initialState;
+			lexeme.str(std::string{});
 		}
 		else if (currState == initialState) {
 			lexeme.str(std::string{});

@@ -17,6 +17,8 @@ class Token
 		IntConst,
 		RealConst,
 		BoolConst,
+		UnsignedInt,
+		UnsignedReal,
 		Keyword,
 		Assign,
 		Add,
@@ -35,9 +37,7 @@ class Token
 		RightParen,
 		LeftCurly,
 		RightCurly,
-		Punct,
 		Semicolon,
-		Whitespace,
 		EOL,
 		FEOF,
 		Unexpected
