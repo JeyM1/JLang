@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <memory>
 #include "Token.h"
 
 class Lexer
@@ -26,10 +27,10 @@ class Lexer
 
 	struct LineToken
 	{
-		Token token;
+		std::shared_ptr<Token> token;
 		unsigned int line;
 
-		explicit LineToken( unsigned int, Token token );
+		explicit LineToken( unsigned int, std::shared_ptr<Token> token );
 	};
 
 	static const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> stateTransitionFn;

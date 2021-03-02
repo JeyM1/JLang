@@ -7,7 +7,9 @@
 #include <sstream>
 #include <utility>
 #include <iomanip>
+#include <memory>
 #include "Lexer.h"
+#include "BoolConstToken.h"
 
 using ClassOfChar = Lexer::ClassOfChar;
 
@@ -20,7 +22,7 @@ const std::map<ClassOfChar, std::string> Lexer::charClasses = {
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
-	// Identifier
+	// Identifiers, Keywords or BoolConsts
 	{{ 0, Letter }, 1 },
 	{{ 1, Letter }, 1 },
 	{{ 1, Digit }, 1 },
@@ -43,7 +45,7 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	{{ 0, Whitespace }, 0 },
 
 	// NewLine
-	{{0, Newline}, 9},
+	{{ 0, Newline }, 9 },
 
 	// Unexpected
 	{{ 0, Other }, 101 },
@@ -56,8 +58,8 @@ const std::map<
 > Lexer::finalStateProcessingFunctions = {
 	{ 2,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-	    Token token = Token::getLanguageToken(lexeme);
-	    if (token.is(Token::Unexpected)) {
+	    std::shared_ptr<Token> token = Token::getLanguageToken(lexeme);
+	    if (token->is(Token::Unexpected)) {
 		    // token is not Language-in, its identifier
 		    auto it = std::find(instance.identifiers.begin(), instance.identifiers.end(), lexeme);
 		    if (it == instance.identifiers.end()) {
@@ -65,7 +67,7 @@ const std::map<
 			    instance.identifiers.push_back(lexeme);
 		    }
 
-		    token = Token{ Token::Type::Identifier, lexeme };
+		    token = std::make_shared<Token>(Token::Type::Identifier, lexeme);
 	    }
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
@@ -75,11 +77,11 @@ const std::map<
 	// UnsignedReal
 	{ 5,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-		if(std::string{currChar} == charClasses.at(ClassOfChar::Dot)) {
-			// TODO: set next token to Unexpected
-			std::cout << "Invalid suffix on real constant!" << std::endl;
-		}
-	    Token token{ Token::Type::UnsignedReal, lexeme };
+	    if (std::string{ currChar } == charClasses.at(ClassOfChar::Dot)) {
+		    // TODO: set next token to Unexpected
+		    std::cout << "Invalid suffix on real constant!" << std::endl;
+	    }
+	    std::shared_ptr<Token> token = std::make_shared<Token>(Token::Type::UnsignedReal, lexeme);
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
 	  }
@@ -88,7 +90,7 @@ const std::map<
 	// UnsignedInt
 	{ 8,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-	    Token token{ Token::Type::UnsignedInt, lexeme };
+	    std::shared_ptr<Token> token = std::make_shared<Token>(Token::Type::UnsignedInt, lexeme);
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
 	  }
@@ -97,7 +99,7 @@ const std::map<
 	// Newline
 	{ 9,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-		currLine++;
+	    currLine++;
 	  }
 	},
 
@@ -106,13 +108,13 @@ const std::map<
 	{ 101,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance ) {
 	    std::cout << "DEBUG: found unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
-	    instance.tokens.emplace_back(currLine, Token{ Token::Type::Unexpected, lexeme + currChar });
+	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Unexpected, lexeme + currChar));
 	  }
 	},
 
 };
 
-Lexer::LineToken::LineToken( unsigned int line, Token token ) : line(line), token(std::move(token)) {}
+Lexer::LineToken::LineToken( unsigned int line, std::shared_ptr<Token> token ) : line(line), token(std::move(token)) {}
 Lexer::Lexer() {}
 
 bool Lexer::lex( std::istream& inpStream ) noexcept {
@@ -169,6 +171,10 @@ ClassOfChar Lexer::classOfChar( char ch ) {
 }
 void Lexer::printTokenTable() {
 	for (const auto& lineToken : this->tokens) {
-		std::cout << std::setw(3) << lineToken.line << " | " << lineToken.token << std::endl;
+		std::cout << std::setw(3) << lineToken.line << " | " << *lineToken.token;
+		if (lineToken.token->is(Token::Type::BoolConst)) {
+			std::cout << " actual: " << std::dynamic_pointer_cast<BoolConstToken>(lineToken.token)->actual();
+		}
+		std::cout << std::endl;
 	}
 }

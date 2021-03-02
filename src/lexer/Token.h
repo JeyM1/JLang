@@ -6,7 +6,9 @@
 #define _TOKEN_H_
 
 #include <string_view>
-#include <ostream>
+#include <iostream>
+#include <map>
+#include <memory>
 
 class Token
 {
@@ -51,6 +53,7 @@ class Token
 
   public:
 	Token( Type type, std::string  lexeme );
+	virtual ~Token();
 
 	Type type() const noexcept { return _type; }
 	void setType( Type t ) noexcept { _type = t; }
@@ -66,8 +69,10 @@ class Token
 		return is( t1 ) || is_one_of( t2, ts... );
 	}
 
-	static Token getLanguageToken(const std::string&);
+	static std::shared_ptr<Token> getLanguageToken(const std::string&);
+
 	friend std::ostream& operator<<( std::ostream& os, const Token& token );
+
 
 };
 
