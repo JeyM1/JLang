@@ -14,12 +14,12 @@ class Token
 	enum Type
 	{
 		Identifier,
+		Keyword,
 		IntConst,
 		RealConst,
 		BoolConst,
 		UnsignedInt,
 		UnsignedReal,
-		Keyword,
 		Assign,
 		Add,
 		Sub,

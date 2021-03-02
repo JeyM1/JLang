@@ -33,7 +33,6 @@ class Lexer
 	};
 
 	static const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> stateTransitionFn;
-	static const unsigned int initialState{ 0 };
 	static const std::map<
 		unsigned int,
 		std::function<void( std::istream&, const std::string&, char, unsigned int&, Lexer& )>
@@ -41,6 +40,10 @@ class Lexer
 
 	std::vector<LineToken> tokens;
 	std::vector<std::string> identifiers;
+
+	bool isLastLexSuccess = true;
+	static const unsigned int initialState{ 0 };
+	unsigned int currState{ initialState };
 
   public:
 	Lexer();

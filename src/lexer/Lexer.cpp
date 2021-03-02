@@ -75,6 +75,10 @@ const std::map<
 	// UnsignedReal
 	{ 5,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+		if(std::string{currChar} == charClasses.at(ClassOfChar::Dot)) {
+			// TODO: set next token to Unexpected
+			std::cout << "Invalid suffix on real constant!" << std::endl;
+		}
 	    Token token{ Token::Type::UnsignedReal, lexeme };
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
@@ -112,40 +116,38 @@ Lexer::LineToken::LineToken( unsigned int line, Token token ) : line(line), toke
 Lexer::Lexer() {}
 
 bool Lexer::lex( std::istream& inpStream ) noexcept {
-	bool isSuccess = true;
-	unsigned int currState = Lexer::initialState;
 	unsigned int currLine = 1;
 	std::stringstream lexeme;
 	for (char ch; (ch = inpStream.get()) != EOF;) {
 		ClassOfChar charClass = classOfChar(ch);
 		std::cout << "class = " << charClass;
 		std::cout << " | char = \"" << ch;
-		std::cout << "\" | state = " << currState << std::endl;
+		std::cout << "\" | state = " << this->currState << std::endl;
 		try {
-			currState = stateTransitionFn.at(std::make_pair(currState, charClass));
-			std::cout << "Changed state to: " << currState << std::endl;
+			this->currState = stateTransitionFn.at(std::make_pair(this->currState, charClass));
+			std::cout << "Changed state to: " << this->currState << std::endl;
 		}
 		catch (std::exception& e) {
 			try {
-				currState = stateTransitionFn.at(std::make_pair(currState, Other));
-				std::cout << "Changed state by Other to: " << currState << std::endl;
+				this->currState = stateTransitionFn.at(std::make_pair(this->currState, Other));
+				std::cout << "Changed state by Other to: " << this->currState << std::endl;
 			}
 			catch (...) {
-				std::cerr << "No state to go from " << currState << std::endl;
-				isSuccess = false;
+				std::cerr << "No state to go from " << this->currState << std::endl;
+				this->isLastLexSuccess = false;
 				// TODO: change to unexpected token
 			}
 		}
-		bool isStateFinal = finalStateProcessingFunctions.count(currState) > 0;
+		bool isStateFinal = finalStateProcessingFunctions.count(this->currState) > 0;
 		if (isStateFinal) {
 			// call processing fn
-			std::cout << "State " << currState << " is final, calling processing func" << std::endl;
+			std::cout << "State " << this->currState << " is final, calling processing func" << std::endl;
 
-			finalStateProcessingFunctions.at(currState)(inpStream, lexeme.str(), ch, currLine, *this);
-			currState = initialState;
+			finalStateProcessingFunctions.at(this->currState)(inpStream, lexeme.str(), ch, currLine, *this);
+			this->currState = initialState;
 			lexeme.str(std::string{});
 		}
-		else if (currState == initialState) {
+		else if (this->currState == initialState) {
 			lexeme.str(std::string{});
 		}
 		else {
@@ -154,8 +156,9 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 		}
 	}
 
-	return isSuccess;
+	return this->isLastLexSuccess;
 }
+
 ClassOfChar Lexer::classOfChar( char ch ) {
 	for (int charClassInt = 0; charClassInt < ClassOfChar::Other; charClassInt++) {
 		auto cls = static_cast<ClassOfChar>(charClassInt);
