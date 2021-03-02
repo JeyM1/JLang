@@ -21,6 +21,7 @@ class Lexer
 		Whitespace,
 		Newline,
 		Dot,
+		Sign,
 		Other
 	};
 	static const std::map<ClassOfChar, std::string> charClasses;

@@ -10,6 +10,8 @@
 #include <memory>
 #include "Lexer.h"
 #include "BoolConstToken.h"
+#include "IntConstToken.h"
+#include "RealConstToken.h"
 
 using ClassOfChar = Lexer::ClassOfChar;
 
@@ -19,6 +21,7 @@ const std::map<ClassOfChar, std::string> Lexer::charClasses = {
 	{ Whitespace, " \t" },
 	{ Newline, "\r\n" },
 	{ Dot, "." },
+	{ Sign, "+-" }
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
@@ -38,7 +41,8 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	{{ 4, Other }, 5 },
 	{{ 0, Dot }, 6 },
 	{{ 6, Digit }, 4 },
-	//
+	// if Signed Int/Real
+	{{ 0, Sign }, 3 },
 
 
 	// Whitespace
@@ -74,23 +78,23 @@ const std::map<
 	  }
 	},
 
-	// UnsignedReal
+	// RealConst
 	{ 5,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
 	    if (std::string{ currChar } == charClasses.at(ClassOfChar::Dot)) {
 		    // TODO: set next token to Unexpected
 		    std::cout << "Invalid suffix on real constant!" << std::endl;
 	    }
-	    std::shared_ptr<Token> token = std::make_shared<Token>(Token::Type::UnsignedReal, lexeme);
+	    std::shared_ptr<Token> token = std::make_shared<RealConstToken>(lexeme);
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
 	  }
 	},
 
-	// UnsignedInt
+	// IntConst
 	{ 8,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-	    std::shared_ptr<Token> token = std::make_shared<Token>(Token::Type::UnsignedInt, lexeme);
+	    std::shared_ptr<Token> token = std::make_shared<IntConstToken>(lexeme);
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
 	  }
@@ -169,11 +173,18 @@ ClassOfChar Lexer::classOfChar( char ch ) {
 	}
 	return Other;
 }
+
 void Lexer::printTokenTable() {
 	for (const auto& lineToken : this->tokens) {
 		std::cout << std::setw(3) << lineToken.line << " | " << *lineToken.token;
 		if (lineToken.token->is(Token::Type::BoolConst)) {
 			std::cout << " actual: " << std::dynamic_pointer_cast<BoolConstToken>(lineToken.token)->actual();
+		}
+		else if (lineToken.token->is(Token::Type::RealConst)) {
+			std::cout << " actual: " << std::dynamic_pointer_cast<RealConstToken>(lineToken.token)->actual();
+		}
+		else if (lineToken.token->is(Token::Type::IntConst)) {
+			std::cout << " actual: " << std::dynamic_pointer_cast<IntConstToken>(lineToken.token)->actual();
 		}
 		std::cout << std::endl;
 	}

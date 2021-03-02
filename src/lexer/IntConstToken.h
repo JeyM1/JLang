@@ -5,8 +5,19 @@
 #ifndef _INTCONSTTOKEN_H_
 #define _INTCONSTTOKEN_H_
 
-class IntConstToken
+#include "Token.h"
+
+class IntConstToken : public Token
 {
+  protected:
+	int _actual;
+
+  public:
+	explicit IntConstToken( const std::string& lexeme );
+
+	int actual() const {
+		return _actual;
+	}
 
 };
 

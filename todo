@@ -1,0 +1,4 @@
+TODO:
+    - Debug-logger
+    - automatic type-mapping with actual
+    - Errors related to unexpected tokens (Int & real)

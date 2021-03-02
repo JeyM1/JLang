@@ -20,8 +20,6 @@ class Token
 		IntConst,
 		RealConst,
 		BoolConst,
-		UnsignedInt,
-		UnsignedReal,
 		Assign,
 		Add,
 		Sub,
