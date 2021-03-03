@@ -3,4 +3,6 @@ project(JLang)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(JLang src/main.cpp src/lexer/Token.cpp src/lexer/Token.h src/lexer/Lexer.cpp src/lexer/Lexer.h src/lexer/IntConstToken.cpp src/lexer/IntConstToken.h src/lexer/BoolConstToken.cpp src/lexer/BoolConstToken.h src/lexer/RealConstToken.cpp src/lexer/RealConstToken.h)
+#add_compile_definitions(_DEBUG)
+
+add_executable(JLang src/main.cpp src/lexer/Token.cpp src/lexer/Token.h src/lexer/Lexer.cpp src/lexer/Lexer.h src/lexer/IntConstToken.cpp src/lexer/IntConstToken.h src/lexer/BoolConstToken.cpp src/lexer/BoolConstToken.h src/lexer/RealConstToken.cpp src/lexer/RealConstToken.h src/logger.h src/logger.cpp)

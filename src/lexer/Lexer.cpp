@@ -12,6 +12,7 @@
 #include "BoolConstToken.h"
 #include "IntConstToken.h"
 #include "RealConstToken.h"
+#include "../logger.h"
 
 using ClassOfChar = Lexer::ClassOfChar;
 
@@ -21,7 +22,11 @@ const std::map<ClassOfChar, std::string> Lexer::charClasses = {
 	{ Whitespace, " \t" },
 	{ Newline, "\r\n" },
 	{ Dot, "." },
-	{ Sign, "+-" }
+	{ Sign, "+-" },
+	{ Semicolon, ";" },
+	{ Parenthesis, "{}()" },
+	{ Operators, "!=*/<>&|" },
+
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
@@ -42,14 +47,27 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	{{ 0, Dot }, 6 },
 	{{ 6, Digit }, 4 },
 	// if Signed Int/Real
-	{{ 0, Sign }, 3 },
-
+	{{ 0, Sign }, 7 },
+	{{ 7, Digit }, 3 },
+	// if other, treat as operator
+	{{ 7, Other }, 13 },
 
 	// Whitespace
 	{{ 0, Whitespace }, 0 },
 
 	// NewLine
 	{{ 0, Newline }, 9 },
+
+	// Semicolon
+	{{ 0, Semicolon }, 10 },
+
+	// Parenthesis
+	{{ 0, Parenthesis }, 11 },
+
+	// Operators
+	{{ 0, Operators }, 12 },
+	{{ 12, Operators }, 12 },
+	{{ 12, Other }, 13 },
 
 	// Unexpected
 	{{ 0, Other }, 101 },
@@ -60,6 +78,7 @@ const std::map<
 	unsigned int,
 	std::function<void( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance )>
 > Lexer::finalStateProcessingFunctions = {
+	// Identifiers, Keywords or BoolConsts
 	{ 2,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
 	    std::shared_ptr<Token> token = Token::getLanguageToken(lexeme);
@@ -107,11 +126,40 @@ const std::map<
 	  }
 	},
 
+	// Semicolon
+	{ 10,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Semicolon, std::string{currChar}));
+	  }
+	},
+
+	// Parenthesis
+	{ 11,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    instance.tokens.emplace_back(currLine, Token::getLanguageToken(std::string{currChar}));
+	  }
+	},
+
+	// Operators
+	{ 13,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    std::shared_ptr<Token> token = Token::getLanguageToken(lexeme);
+	    if (token->is(Token::Unexpected)) {
+		    // token not found
+		    // TODO: display error
+		    std::cerr.flush();
+			std::cerr << "Unexpected Operator token \"" << lexeme << "\" on line " << currLine << std::endl;
+	    }
+	    instance.tokens.emplace_back(currLine, token);
+	    in.unget();
+	  }
+	},
 
 	// Error state
 	{ 101,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance ) {
-	    std::cout << "DEBUG: found unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
+		std::cerr.flush();
+	    std::cerr << "Unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
 	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Unexpected, lexeme + currChar));
 	  }
 	},
@@ -126,17 +174,17 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 	std::stringstream lexeme;
 	for (char ch; (ch = inpStream.get()) != EOF;) {
 		ClassOfChar charClass = classOfChar(ch);
-		std::cout << "class = " << charClass;
-		std::cout << " | char = \"" << ch;
-		std::cout << "\" | state = " << this->currState << std::endl;
+		log("Lexer: ") << "class = " << charClass;
+		log("Lexer: ") << " | char = \"" << ch;
+		log("Lexer: ") << "\" | state = " << this->currState << std::endl;
 		try {
 			this->currState = stateTransitionFn.at(std::make_pair(this->currState, charClass));
-			std::cout << "Changed state to: " << this->currState << std::endl;
+			log("Lexer: ")  << "Changed state to: " << this->currState << std::endl;
 		}
 		catch (std::exception& e) {
 			try {
 				this->currState = stateTransitionFn.at(std::make_pair(this->currState, Other));
-				std::cout << "Changed state by Other to: " << this->currState << std::endl;
+				log("Lexer: ")  << "Changed state by Other to: " << this->currState << std::endl;
 			}
 			catch (...) {
 				std::cerr << "No state to go from " << this->currState << std::endl;
@@ -147,7 +195,7 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 		bool isStateFinal = finalStateProcessingFunctions.count(this->currState) > 0;
 		if (isStateFinal) {
 			// call processing fn
-			std::cout << "State " << this->currState << " is final, calling processing func" << std::endl;
+			log("Lexer: ") << "State " << this->currState << " is final, calling processing func" << std::endl;
 
 			finalStateProcessingFunctions.at(this->currState)(inpStream, lexeme.str(), ch, currLine, *this);
 			this->currState = initialState;
@@ -158,7 +206,7 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 		}
 		else {
 			lexeme.put(ch);
-			std::cout << "Changed lexeme to: " << lexeme.str() << std::endl;
+			log("Lexer: ") << "Changed lexeme to: " << lexeme.str() << std::endl;
 		}
 	}
 

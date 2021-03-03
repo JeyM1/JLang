@@ -22,6 +22,9 @@ class Lexer
 		Newline,
 		Dot,
 		Sign,
+		Semicolon,
+		Parenthesis,
+		Operators,
 		Other
 	};
 	static const std::map<ClassOfChar, std::string> charClasses;

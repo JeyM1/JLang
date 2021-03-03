@@ -8,6 +8,7 @@
 #include <memory>
 #include "Token.h"
 #include "BoolConstToken.h"
+#include "../logger.h"
 
 using Type = Token::Type;
 
@@ -40,6 +41,8 @@ const std::map<const std::string, Type> Token::languageTokens = {
 	{ ">=", Type::GreaterOrEqualTo },
 	{ ">", Type::GreaterThan },
 	{ "!=", Type::NotEqual },
+	{ "&&", Type::And },
+	{ "||", Type::Or },
 	{ "(", Type::LeftParen },
 	{ ")", Type::RightParen },
 	{ "{", Type::LeftCurly },
@@ -66,7 +69,7 @@ std::shared_ptr<Token> Token::getLanguageToken( const std::string& lexeme ) {
 	}
 	catch (...) {
 		// TODO: remove message
-		std::cout << "Unexpected language token \"" << lexeme << "\"" << std::endl;
+		log("Lexer: ") << "Unexpected language token \"" << lexeme << "\"" << std::endl;
 	}
 	return std::make_shared<Token>(Unexpected, lexeme);
 }
