@@ -6,9 +6,13 @@
 #include <iostream>
 #include <utility>
 #include <memory>
+#include <vector>
+#include <algorithm>
 #include "Token.h"
 #include "BoolConstToken.h"
 #include "../logger.h"
+#include "../utility.h"
+
 
 using Type = Token::Type;
 
@@ -59,13 +63,14 @@ const std::map<const std::string, Type> Token::languageTokens = {
 };
 
 Token::Token( Token::Type type, std::string lexeme ) : _type(type), _lexeme(std::move(lexeme)) {}
+
 std::shared_ptr<Token> Token::getLanguageToken( const std::string& lexeme ) {
 	try {
 		Type t = languageTokens.at(lexeme);
 		if (t == Type::BoolConst) {
-			return std::make_shared<BoolConstToken>( lexeme );
+			return std::make_shared<BoolConstToken>(lexeme);
 		}
-		return std::make_shared<Token>( t, lexeme );
+		return std::make_shared<Token>(t, lexeme);
 	}
 	catch (...) {
 		// TODO: remove message
@@ -73,10 +78,36 @@ std::shared_ptr<Token> Token::getLanguageToken( const std::string& lexeme ) {
 	}
 	return std::make_shared<Token>(Unexpected, lexeme);
 }
+
 std::ostream& operator<<( std::ostream& os, const Token& token ) {
 	os << "type: " << token._type << " lexeme: " << token._lexeme;
 	return os;
 }
+
 Token::~Token() {
 
+}
+
+std::string Token::getClosestLanguageToken( const std::string& lexeme ) {
+	std::vector<std::string> keys;
+
+
+	std::transform(
+		languageTokens.begin(),
+		languageTokens.end(),
+		std::back_inserter(keys),
+		[]( const std::map<const std::string, Token::Type>::value_type& pair ) { return pair.first; }
+	);
+
+	auto closest = keys.begin();
+	int minEditDist = 100000;
+	for(auto it = closest; it != keys.end(); ++it) {
+		int dist = editDist(*it, lexeme, it->size(), lexeme.size());
+		if(dist < minEditDist) {
+			closest = it;
+			minEditDist = dist;
+		}
+	}
+
+	return *closest;
 }

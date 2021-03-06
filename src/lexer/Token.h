@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 
+
 class Token
 {
   public:
@@ -84,6 +85,7 @@ class Token
 	virtual ~Token();
 
 	Type type() const noexcept { return _type; }
+
 	void setType( Type t ) noexcept { _type = t; }
 
 	bool is( Type t ) const noexcept { return t == _type; }
@@ -98,6 +100,7 @@ class Token
 	}
 
 	static std::shared_ptr<Token> getLanguageToken( const std::string& );
+	static std::string getClosestLanguageToken( const std::string& );
 
 	friend std::ostream& operator<<( std::ostream& os, const Token& token );
 

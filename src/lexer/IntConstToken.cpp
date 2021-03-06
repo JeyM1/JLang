@@ -3,6 +3,8 @@
 //
 
 #include "IntConstToken.h"
+
+
 IntConstToken::IntConstToken( const std::string& lexeme )
 	: Token(Type::IntConst, lexeme) {
 	try {

@@ -5,12 +5,13 @@
 #include <iostream>
 #include "BoolConstToken.h"
 
+
 BoolConstToken::BoolConstToken( const std::string& lexeme )
 	: Token(Token::Type::BoolConst, lexeme) {
-	if(lexeme == "true") {
+	if (lexeme == "true") {
 		_actual = true;
 	}
-	else if(lexeme == "false") {
+	else if (lexeme == "false") {
 		_actual = false;
 	}
 	else {

@@ -14,6 +14,7 @@
 #include "RealConstToken.h"
 #include "../logger.h"
 
+
 using ClassOfChar = Lexer::ClassOfChar;
 
 const std::map<ClassOfChar, std::string> Lexer::charClasses = {
@@ -129,14 +130,15 @@ const std::map<
 	// Semicolon
 	{ 10,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Semicolon, std::string{currChar}));
+	    instance.tokens
+	            .emplace_back(currLine, std::make_shared<Token>(Token::Type::Semicolon, std::string{ currChar }));
 	  }
 	},
 
 	// Parenthesis
 	{ 11,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-	    instance.tokens.emplace_back(currLine, Token::getLanguageToken(std::string{currChar}));
+	    instance.tokens.emplace_back(currLine, Token::getLanguageToken(std::string{ currChar }));
 	  }
 	},
 
@@ -148,7 +150,8 @@ const std::map<
 		    // token not found
 		    // TODO: display error
 		    std::cerr.flush();
-			std::cerr << "Unexpected Operator token \"" << lexeme << "\" on line " << currLine << std::endl;
+		    std::cerr << "Unexpected Operator token \"" << lexeme << "\" on line " << currLine << std::endl;
+		    std::cerr << "Did you mean \"" << Token::getClosestLanguageToken(lexeme) << "\"?" << std::endl;
 	    }
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
@@ -158,7 +161,7 @@ const std::map<
 	// Error state
 	{ 101,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int currLine, Lexer& instance ) {
-		std::cerr.flush();
+	    std::cerr.flush();
 	    std::cerr << "Unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
 	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Unexpected, lexeme + currChar));
 	  }
@@ -167,6 +170,7 @@ const std::map<
 };
 
 Lexer::LineToken::LineToken( unsigned int line, std::shared_ptr<Token> token ) : line(line), token(std::move(token)) {}
+
 Lexer::Lexer() {}
 
 bool Lexer::lex( std::istream& inpStream ) noexcept {
@@ -179,12 +183,12 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 		log("Lexer: ") << "\" | state = " << this->currState << std::endl;
 		try {
 			this->currState = stateTransitionFn.at(std::make_pair(this->currState, charClass));
-			log("Lexer: ")  << "Changed state to: " << this->currState << std::endl;
+			log("Lexer: ") << "Changed state to: " << this->currState << std::endl;
 		}
 		catch (std::exception& e) {
 			try {
 				this->currState = stateTransitionFn.at(std::make_pair(this->currState, Other));
-				log("Lexer: ")  << "Changed state by Other to: " << this->currState << std::endl;
+				log("Lexer: ") << "Changed state by Other to: " << this->currState << std::endl;
 			}
 			catch (...) {
 				std::cerr << "No state to go from " << this->currState << std::endl;

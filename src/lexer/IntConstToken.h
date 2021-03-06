@@ -7,6 +7,7 @@
 
 #include "Token.h"
 
+
 class IntConstToken : public Token
 {
   protected:

@@ -7,6 +7,7 @@
 
 #include "Token.h"
 
+
 class BoolConstToken : public Token
 {
   protected:
