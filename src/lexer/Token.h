@@ -18,58 +18,85 @@ class Token
 	{
 		// 0
 		Identifier,
+
 		// 1
 		Keyword,
+
 		// 2
 		IntConst,
+
 		// 3
 		RealConst,
+
 		// 4
 		BoolConst,
+
 		// 5
 		Assign,
+
 		// 6
 		Add,
+
 		// 7
 		Sub,
+
 		// 8
 		Multiply,
+
 		// 9
 		Division,
+
 		// 10
 		IntDivision,
+
 		// 11
 		Power,
+
 		// 12
 		LessThan,
+
 		// 13
 		LessOrEqualTo,
+
 		// 14
 		EqualTo,
+
 		// 15
 		GreaterOrEqualTo,
+
 		// 16
 		GreaterThan,
+
 		// 17
 		NotEqual,
+
 		// 18
 		And,
+
 		// 19
 		Or,
+
 		// 20
 		LeftParen,
+
 		// 21
 		RightParen,
+
 		// 22
 		LeftCurly,
+
 		// 23
 		RightCurly,
+
 		// 24
 		Semicolon,
+
 		// 25
 		EOL,
+
 		// 26
 		FEOF,
+		
 		// 27
 		Unexpected
 	};
@@ -87,6 +114,8 @@ class Token
 	Type type() const noexcept { return _type; }
 
 	void setType( Type t ) noexcept { _type = t; }
+
+	const std::string& lexeme() const { return _lexeme; }
 
 	bool is( Type t ) const noexcept { return t == _type; }
 

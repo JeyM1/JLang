@@ -104,6 +104,7 @@ const std::map<
 	    if (std::string{ currChar } == charClasses.at(ClassOfChar::Dot)) {
 		    // TODO: set next token to Unexpected
 		    std::cout << "Invalid suffix on real constant!" << std::endl;
+		    instance.isLastLexSuccess = false;
 	    }
 	    std::shared_ptr<Token> token = std::make_shared<RealConstToken>(lexeme);
 	    instance.tokens.emplace_back(currLine, token);
@@ -147,11 +148,11 @@ const std::map<
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
 	    std::shared_ptr<Token> token = Token::getLanguageToken(lexeme);
 	    if (token->is(Token::Unexpected)) {
-		    // token not found
-		    // TODO: display error
+		    // operator token not found
 		    std::cerr.flush();
 		    std::cerr << "Unexpected Operator token \"" << lexeme << "\" on line " << currLine << std::endl;
 		    std::cerr << "Did you mean \"" << Token::getClosestLanguageToken(lexeme) << "\"?" << std::endl;
+		    instance.isLastLexSuccess = false;
 	    }
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
@@ -193,7 +194,6 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 			catch (...) {
 				std::cerr << "No state to go from " << this->currState << std::endl;
 				this->isLastLexSuccess = false;
-				// TODO: change to unexpected token
 			}
 		}
 		bool isStateFinal = finalStateProcessingFunctions.count(this->currState) > 0;
@@ -228,15 +228,20 @@ ClassOfChar Lexer::classOfChar( char ch ) {
 
 void Lexer::printTokenTable() {
 	for (const auto& lineToken : this->tokens) {
-		std::cout << std::setw(3) << lineToken.line << " | " << *lineToken.token;
+		std::cout << std::setw(3) << lineToken.line << " | " << "type: " << lineToken.token->type()
+		          << "\tlexeme: " << lineToken.token->lexeme();
 		if (lineToken.token->is(Token::Type::BoolConst)) {
-			std::cout << " actual: " << std::dynamic_pointer_cast<BoolConstToken>(lineToken.token)->actual();
+			std::cout << "\tactual: " << std::dynamic_pointer_cast<BoolConstToken>(lineToken.token)->actual();
 		}
 		else if (lineToken.token->is(Token::Type::RealConst)) {
-			std::cout << " actual: " << std::dynamic_pointer_cast<RealConstToken>(lineToken.token)->actual();
+			std::cout << "\tactual: " << std::dynamic_pointer_cast<RealConstToken>(lineToken.token)->actual();
 		}
 		else if (lineToken.token->is(Token::Type::IntConst)) {
-			std::cout << " actual: " << std::dynamic_pointer_cast<IntConstToken>(lineToken.token)->actual();
+			std::cout << "\tactual: " << std::dynamic_pointer_cast<IntConstToken>(lineToken.token)->actual();
+		}
+		else if (lineToken.token->is(Token::Type::Identifier)) {
+			std::cout << "\tid: " << std::find(identifiers.begin(), identifiers.end(), lineToken.token->lexeme())
+			                         - identifiers.begin();
 		}
 		std::cout << std::endl;
 	}

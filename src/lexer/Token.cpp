@@ -91,7 +91,6 @@ Token::~Token() {
 std::string Token::getClosestLanguageToken( const std::string& lexeme ) {
 	std::vector<std::string> keys;
 
-
 	std::transform(
 		languageTokens.begin(),
 		languageTokens.end(),
@@ -101,9 +100,9 @@ std::string Token::getClosestLanguageToken( const std::string& lexeme ) {
 
 	auto closest = keys.begin();
 	int minEditDist = 100000;
-	for(auto it = closest; it != keys.end(); ++it) {
+	for (auto it = closest; it != keys.end(); ++it) {
 		int dist = editDist(*it, lexeme, it->size(), lexeme.size());
-		if(dist < minEditDist) {
+		if (dist < minEditDist) {
 			closest = it;
 			minEditDist = dist;
 		}
