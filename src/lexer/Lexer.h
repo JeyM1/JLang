@@ -26,6 +26,7 @@ class Lexer
 		Semicolon,
 		Parenthesis,
 		Operators,
+		FEOF,
 		Other
 	};
 	static const std::map<ClassOfChar, std::string> charClasses;

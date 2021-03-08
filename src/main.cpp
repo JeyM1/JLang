@@ -8,5 +8,6 @@ int main() {
 	Lexer lexer{};
 	lexer.lex(inputFile);
 	lexer.printTokenTable();
+	std::cout << "Lexer success status: " << lexer.isLastLexSuccess << std::endl;
 	return 0;
 }

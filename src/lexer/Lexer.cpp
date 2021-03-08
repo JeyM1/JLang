@@ -27,7 +27,6 @@ const std::map<ClassOfChar, std::string> Lexer::charClasses = {
 	{ Semicolon, ";" },
 	{ Parenthesis, "{}()" },
 	{ Operators, "!=*/<>&|" },
-
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
@@ -59,6 +58,9 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	// NewLine
 	{{ 0, Newline }, 9 },
 
+	// EOF
+	{{ 0, FEOF }, 0 },
+
 	// Semicolon
 	{{ 0, Semicolon }, 10 },
 
@@ -72,12 +74,17 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 
 	// Unexpected
 	{{ 0, Other }, 101 },
-
 };
 
 const std::map<
 	unsigned int,
-	std::function<void( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance )>
+	std::function<void( std::istream& in,
+	                    const std::string& lexeme,
+	                    char currChar,
+	                    unsigned int&
+	                    currLine,
+	                    Lexer& instance
+	)>
 > Lexer::finalStateProcessingFunctions = {
 	// Identifiers, Keywords or BoolConsts
 	{ 2,
@@ -165,9 +172,11 @@ const std::map<
 	    std::cerr.flush();
 	    std::cerr << "Unexpected token \"" << lexeme + currChar << "\" at line " << currLine << std::endl;
 	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Unexpected, lexeme + currChar));
+	    instance.isLastLexSuccess = false;
+	    if (currChar == EOF)
+		    std::cout << "Its EOF!" << std::endl;
 	  }
 	},
-
 };
 
 Lexer::LineToken::LineToken( unsigned int line, std::shared_ptr<Token> token ) : line(line), token(std::move(token)) {}
@@ -177,11 +186,11 @@ Lexer::Lexer() {}
 bool Lexer::lex( std::istream& inpStream ) noexcept {
 	unsigned int currLine = 1;
 	std::stringstream lexeme;
-	for (char ch; (ch = inpStream.get()) != EOF;) {
+	for (char ch; (ch = inpStream.get());) {
 		ClassOfChar charClass = classOfChar(ch);
 		log("Lexer: ") << "class = " << charClass;
-		log("Lexer: ") << " | char = \"" << ch;
-		log("Lexer: ") << "\" | state = " << this->currState << std::endl;
+		log() << " | char = \"" << ch;
+		log() << "\" | state = " << this->currState << std::endl;
 		try {
 			this->currState = stateTransitionFn.at(std::make_pair(this->currState, charClass));
 			log("Lexer: ") << "Changed state to: " << this->currState << std::endl;
@@ -212,12 +221,16 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 			lexeme.put(ch);
 			log("Lexer: ") << "Changed lexeme to: " << lexeme.str() << std::endl;
 		}
+		if (ch == EOF)
+			break;
 	}
 
 	return this->isLastLexSuccess;
 }
 
 ClassOfChar Lexer::classOfChar( char ch ) {
+	if (ch == EOF)
+		return FEOF;
 	for (int charClassInt = 0; charClassInt < ClassOfChar::Other; charClassInt++) {
 		auto cls = static_cast<ClassOfChar>(charClassInt);
 		if (charClasses.at(cls).find(ch) != std::string::npos)
