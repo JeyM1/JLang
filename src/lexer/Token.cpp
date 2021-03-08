@@ -11,7 +11,7 @@
 #include "Token.h"
 #include "BoolConstToken.h"
 #include "../logger.h"
-#include "../utility.h"
+#include "../utils.h"
 
 
 using Type = Token::Type;
@@ -73,7 +73,6 @@ std::shared_ptr<Token> Token::getLanguageToken( const std::string& lexeme ) {
 		return std::make_shared<Token>(t, lexeme);
 	}
 	catch (...) {
-		// TODO: remove message
 		log("Lexer: ") << "Unexpected language token \"" << lexeme << "\"" << std::endl;
 	}
 	return std::make_shared<Token>(Unexpected, lexeme);
