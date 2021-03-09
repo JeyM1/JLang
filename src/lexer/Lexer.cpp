@@ -57,6 +57,7 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 
 	// NewLine
 	{{ 0, Newline }, 9 },
+	{{ 9, Newline }, 9 },
 
 	// EOF
 	{{ 0, FEOF }, 0 },
