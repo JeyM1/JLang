@@ -49,6 +49,8 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 	// if Signed Int/Real
 	{{ 0, Sign }, 7 },
 	{{ 7, Digit }, 3 },
+	// if Letter, treat as Sign
+	{{ 7, Letter }, 14 },
 	// if other, treat as operator
 	{{ 7, Other }, 13 },
 
@@ -163,6 +165,14 @@ const std::map<
 		    instance.isLastLexSuccess = false;
 	    }
 	    instance.tokens.emplace_back(currLine, token);
+	    in.unget();
+	  }
+	},
+
+	// Sign
+	{ 14,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    instance.tokens.emplace_back(currLine, std::make_shared<Token>(Token::Type::Sign, lexeme));
 	    in.unget();
 	  }
 	},
