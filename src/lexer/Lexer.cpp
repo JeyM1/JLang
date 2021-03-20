@@ -270,3 +270,11 @@ void Lexer::printTokenTable() {
 		std::cout << std::endl;
 	}
 }
+
+const std::vector<Lexer::LineToken>& Lexer::getTokens() const {
+	return tokens;
+}
+
+const std::vector<std::string>& Lexer::getIdentifiers() const {
+	return identifiers;
+}

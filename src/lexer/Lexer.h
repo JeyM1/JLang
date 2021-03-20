@@ -59,6 +59,9 @@ class Lexer
 	static ClassOfChar classOfChar( char );
 	void printTokenTable();
 
+	const std::vector<LineToken>& getTokens() const;
+	const std::vector<std::string>& getIdentifiers() const;
+
 };
 
 #endif //_LEXER_H_

@@ -3,7 +3,7 @@ project(JLang)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#add_compile_definitions(_DEBUG)
+add_compile_definitions(_DEBUG)
 
 add_executable(
         JLang
@@ -22,4 +22,6 @@ add_executable(
         src/logger.cpp
         src/utils.h
         src/utils.cpp
-)
+        src/parser/Parser.cpp
+        src/parser/Parser.h
+        src/tree/BTreeNode.cpp src/tree/BTreeNode.h src/parser/exceptions/SyntaxError.cpp src/parser/exceptions/SyntaxError.h src/tree/BTree.cpp src/tree/BTree.h)
