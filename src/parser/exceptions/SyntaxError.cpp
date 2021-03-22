@@ -7,9 +7,8 @@
 #include <utility>
 
 
-SyntaxError::SyntaxError( const unsigned int line, const std::string& message ) :
-	_line(line),
-	_message(std::move("SyntaxError (line" + std::to_string(_line) + "):" + message)) {}
+SyntaxError::SyntaxError( const std::string& message ) :
+	_message(std::move("SyntaxError: " + message)) {}
 
 const char* SyntaxError::what() const noexcept {
 	return _message.c_str();

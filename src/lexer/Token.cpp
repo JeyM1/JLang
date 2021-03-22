@@ -52,7 +52,7 @@ const std::map<const std::string, Type> Token::languageTokens = {
 	{ "{", Type::LeftCurly },
 	{ "}", Type::RightCurly },
 //	{ ".", Type::Punct },
-//	{ ",", Type::Punct },
+	{ ",", Type::Comma },
 //	{ ":", Type::Punct },
 	{ ";", Type::Semicolon },
 //	{ " ", Type::Whitespace },

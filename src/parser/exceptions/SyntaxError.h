@@ -7,14 +7,14 @@
 
 #include <exception>
 #include <string>
+#include "../Parser.h"
 
 
 class SyntaxError : public std::exception
 {
-	const unsigned int _line;
 	const std::string _message;
   public:
-	SyntaxError( unsigned int line, const std::string&  message );
+	explicit SyntaxError( const std::string& message );
 	[[nodiscard]] const char* what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
 };
 

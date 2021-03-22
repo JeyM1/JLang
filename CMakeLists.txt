@@ -24,4 +24,8 @@ add_executable(
         src/utils.cpp
         src/parser/Parser.cpp
         src/parser/Parser.h
-        src/tree/BTreeNode.cpp src/tree/BTreeNode.h src/parser/exceptions/SyntaxError.cpp src/parser/exceptions/SyntaxError.h src/tree/BTree.cpp src/tree/BTree.h)
+        src/parser/tree/TreeNode.h
+        src/parser/tree/Tree.h
+        src/parser/exceptions/SyntaxError.cpp
+        src/parser/exceptions/SyntaxError.h
+)

@@ -95,12 +95,15 @@ class Token
 		Sign,
 
 		// 26
-		EOL,
+		Comma,
 
 		// 27
+		EOL,
+
+		// 28
 		FEOF,
 		
-		// 28
+		// 29
 		Unexpected
 	};
 

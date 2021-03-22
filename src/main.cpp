@@ -11,13 +11,19 @@ int main() {
 	lexer.printTokenTable();
 	std::cout << "Lexer success status: " << lexer.isLastLexSuccess << std::endl;
 
-	if(!lexer.isLastLexSuccess) {
+	if (!lexer.isLastLexSuccess) {
 		std::cerr << "Lexer error" << std::endl;
 		exit(1);
 	}
 
 	Parser parser{};
-	parser.parse(lexer.getTokens(), lexer.getIdentifiers());
+	if (parser.parse(lexer.getTokens(), lexer.getIdentifiers())) {
+		std::cout << "Parser success status: 1" << std::endl;
+	}
+	else {
+		std::cerr << "Parser error" << std::endl;
+		exit(1);
+	}
 
 	return 0;
 }
