@@ -74,6 +74,13 @@ class Parser
 	bool parseIdentList();
 	bool parseTerm();
 	bool parseFactor();
+	bool parseFirstExpr();
+	bool parseIfStatement();
+	bool parseBoolExpr();
+	bool parseBoolTerm();
+	bool parseBoolFactor();
+	bool parseBoolRelation();
+	bool parseDoBlock();
 };
 
 #endif //_PARSER_H_

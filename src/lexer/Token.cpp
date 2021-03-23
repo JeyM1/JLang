@@ -45,6 +45,7 @@ const std::map<const std::string, Type> Token::languageTokens = {
 	{ ">=", Type::GreaterOrEqualTo },
 	{ ">", Type::GreaterThan },
 	{ "!=", Type::NotEqual },
+	{ "!", Type::Not },
 	{ "&&", Type::And },
 	{ "||", Type::Or },
 	{ "(", Type::LeftParen },

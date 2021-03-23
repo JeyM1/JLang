@@ -2,12 +2,12 @@ program Program1 {
     int a = 2;
     double b = 3.14;
     bool c = true;
-    for (int i = 0 by i + 1 while i < 10) {
+    for (int i = 0 by i + 1 while i < 10) do {
         a = a + 1;
         b = b - 1;
         c = a < b && true;
     }
-    if(c) {
+    if(c) then {
 	    print(b);
     } else {
         print(a);

@@ -71,36 +71,39 @@ class Token
 		NotEqual,
 
 		// 18
-		And,
+		Not,
 
 		// 19
-		Or,
+		And,
 
 		// 20
-		LeftParen,
+		Or,
 
 		// 21
-		RightParen,
+		LeftParen,
 
 		// 22
-		LeftCurly,
+		RightParen,
 
 		// 23
-		RightCurly,
+		LeftCurly,
 
 		// 24
-		Semicolon,
+		RightCurly,
 
 		// 25
-		Comma,
+		Semicolon,
 
 		// 26
-		EOL,
+		Comma,
 
 		// 27
+		EOL,
+
+		// 28
 		FEOF,
 		
-		// 28
+		// 29
 		Unexpected
 	};
 

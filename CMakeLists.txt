@@ -3,7 +3,7 @@ project(JLang)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_compile_definitions(_DEBUG)
+#add_compile_definitions(_DEBUG)
 
 add_executable(
         JLang
