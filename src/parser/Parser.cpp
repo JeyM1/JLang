@@ -153,6 +153,58 @@ bool Parser::parseStatement() {
 	return true;
 }
 
+bool Parser::parseBoolExpr() {
+	parseBoolTerm();
+	while (_currToken->token->is(Token::Or)) {
+		++_currToken;
+		parseBoolTerm();
+	}
+	return true;
+}
+
+bool Parser::parseBoolTerm() {
+	parseBoolFactor();
+	while (_currToken->token->is(Token::And)) {
+		++_currToken;
+		parseBoolFactor();
+	}
+	return true;
+}
+
+bool Parser::parseBoolFactor() {
+	if (_currToken->token->is(Token::Not)) {
+		++_currToken;
+		// TODO: do something with NOT
+		parseBoolFactor();
+	}
+	else if (_currToken->token->is(Token::LeftParen)) {
+		parseToken(Token::LeftParen);
+		parseBoolTerm();
+		parseToken(Token::RightParen);
+	}
+	else {
+		parseBoolRelation();
+	}
+
+	return true;
+}
+
+bool Parser::parseBoolRelation() {
+	parseExpression();
+	if (_currToken->token->is_one_of(
+		Token::LessThan,
+		Token::LessOrEqualTo,
+		Token::EqualTo,
+		Token::NotEqual,
+		Token::GreaterOrEqualTo,
+		Token::GreaterThan)
+		) {
+		++_currToken;
+		parseExpression();
+	}
+	return true;
+}
+
 bool Parser::parseExpression() {
 	// [Sign]
 	if (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
@@ -249,58 +301,6 @@ bool Parser::parseIdentList() {
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
 		parseIdentifier();
-	}
-	return true;
-}
-
-bool Parser::parseBoolExpr() {
-	parseBoolTerm();
-	while (_currToken->token->is(Token::Or)) {
-		++_currToken;
-		parseBoolTerm();
-	}
-	return true;
-}
-
-bool Parser::parseBoolTerm() {
-	parseBoolFactor();
-	while (_currToken->token->is(Token::And)) {
-		++_currToken;
-		parseBoolFactor();
-	}
-	return true;
-}
-
-bool Parser::parseBoolFactor() {
-	if (_currToken->token->is(Token::Not)) {
-		++_currToken;
-		// TODO: do something with NOT
-		parseBoolFactor();
-	}
-	else if (_currToken->token->is(Token::LeftParen)) {
-		parseToken(Token::LeftParen);
-		parseBoolTerm();
-		parseToken(Token::RightParen);
-	}
-	else {
-		parseBoolRelation();
-	}
-
-	return true;
-}
-
-bool Parser::parseBoolRelation() {
-	parseExpression();
-	if (_currToken->token->is_one_of(
-		Token::LessThan,
-		Token::LessOrEqualTo,
-		Token::EqualTo,
-		Token::NotEqual,
-		Token::GreaterOrEqualTo,
-		Token::GreaterThan)
-		) {
-		++_currToken;
-		parseExpression();
 	}
 	return true;
 }
