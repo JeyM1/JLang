@@ -124,7 +124,7 @@ bool Parser::parseStatement() {
 		break;
 	}
 	case Token::Keyword: {
-		// Inp, Out or Declaration
+		// Inp, Out or Initialization
 		if (_currToken->token->lexeme() == "print") {
 			parseOut();
 			parseToken(Token::Semicolon);
@@ -140,7 +140,7 @@ bool Parser::parseStatement() {
 			parseForStatement();
 		}
 		else {
-			parseDeclaration();
+			parseInitialization();
 			parseToken(Token::Semicolon);
 		}
 		break;
@@ -205,13 +205,13 @@ bool Parser::parseFirstExpr() {
 bool Parser::parseType() {
 	if (std::find(_types.begin(), _types.end(), _currToken->token->lexeme()) == _types.end()) {
 		// token is not Type
-		throw SyntaxError{ "Expected type in Declaration; got \"" + _currToken->token->lexeme() + "\" instead." };
+		throw SyntaxError{ "Expected type in Initialization; got \"" + _currToken->token->lexeme() + "\" instead." };
 	}
 	++_currToken;
 	return true;
 }
 
-bool Parser::parseDeclaration() {
+bool Parser::parseInitialization() {
 	parseType();
 	parseIdentDecl();
 	while (_currToken->token->is(Token::Comma)) {
@@ -364,7 +364,7 @@ bool Parser::parseForStatement() {
 	parseKeyword("for");
 	parseToken(Token::LeftParen);
 	// IndExpr
-	parseDeclaration();
+	parseInitialization();
 	parseKeyword("by");
 	parseExpression();
 	parseKeyword("while");

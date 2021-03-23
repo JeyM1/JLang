@@ -66,7 +66,7 @@ class Parser
 	bool parseStatementList();
 	bool parseStatement();
 	bool parseExpression();
-	bool parseDeclaration();
+	bool parseInitialization();
 	bool parseIdentDecl();
 	bool parseComma();
 	bool parseInp();
