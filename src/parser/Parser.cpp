@@ -11,7 +11,7 @@
 
 Parser::Parser() {}
 
-const std::vector<std::string> Parser::_types = {"int", "real", "bool"};
+const std::vector<std::string> Parser::_types = { "int", "real", "bool" };
 
 bool Parser::parse( const std::vector<Lexer::LineToken>& tokens, const std::vector<std::string>& identifiers ) {
 	this->_currToken = tokens.begin();
@@ -32,9 +32,7 @@ bool Parser::parse( const std::vector<Lexer::LineToken>& tokens, const std::vect
 
 bool Parser::parseProgram() {
 
-	if (!parseKeyword("program")) {
-		throw SyntaxError{ "Program must start with \"program\" keyword." };
-	}
+	parseKeyword("program");
 	parseIdentifierById(0);
 	parseToken(Token::LeftCurly);
 	parseStatementList();
@@ -49,9 +47,12 @@ bool Parser::parseKeyword( const std::string& keyword ) {
 	}
 
 	std::shared_ptr<Token> token = this->_currToken->token;
+	if(token->is_not(Token::Keyword) || token->lexeme() != keyword) {
+		throw SyntaxError{"Expected keyword \"" + keyword + "\", got \"" + token->lexeme() + "\" instead."};
+	}
 	++this->_currToken;
 
-	return token->is(Token::Keyword) && token->lexeme() == keyword;
+	return true;
 }
 
 bool Parser::parseIdentifierById( unsigned int id ) {
@@ -65,7 +66,7 @@ bool Parser::parseIdentifierById( unsigned int id ) {
 	}
 	++this->_currToken;
 
-	return _identifiers.at(id) == token->lexeme();
+	return true;
 }
 
 bool Parser::parseIdentifier() {
@@ -116,13 +117,55 @@ bool Parser::parseStatement() {
 		parseIdentifier();
 		parseToken(Token::Assign);
 		parseExpression();
-
+	}
+	case Token::Keyword: {
+		// Inp, Out or Declaration
+		if (_currToken->token->lexeme() == "print") {
+			parseOut();
+		}
+		else if (_currToken->token->lexeme() == "read") {
+			parseInp();
+		}
+			// TODO: if and for
+		else {
+			parseDeclaration();
+		}
 	}
 	}
 	return false;
 }
 
 bool Parser::parseExpression() {
+	parseTerm();
+	bool f = true;
+	while (_currToken->token->is_one_of(Token::Add, Token::Sub, Token::Power)) {
+		++_currToken;
+		parseTerm();
+	}
+	return true;
+}
+
+bool Parser::parseTerm() {
+	parseFactor();
+	while (_currToken->token->is_one_of(Token::Multiply, Token::Division, Token::IntDivision)) {
+		++_currToken;
+		parseFactor();
+	}
+	return true;
+}
+
+bool Parser::parseFactor() {
+	if(_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::Identifier)) {
+		++_currToken;
+	}
+	else if(_currToken->token->is(Token::LeftParen)) {
+		parseToken(Token::LeftParen);
+		parseExpression();
+		parseToken(Token::RightParen);
+	}
+	else {
+		throw SyntaxError{"Expected int, real, ident or Expression"};
+	}
 	return false;
 }
 
@@ -130,7 +173,7 @@ bool Parser::parseDeclaration() {
 
 	if (std::find(_types.begin(), _types.end(), _currToken->token->lexeme()) == _types.end()) {
 		// token is not Type
-		throw SyntaxError{"Expected type in Declaration; got \"" + _currToken->token->lexeme() + "\" instead."};
+		throw SyntaxError{ "Expected type in Declaration; got \"" + _currToken->token->lexeme() + "\" instead." };
 	}
 	++_currToken;
 
@@ -146,8 +189,8 @@ bool Parser::parseDeclaration() {
 
 bool Parser::parseIdentDecl() {
 	parseIdentifier();
-	if(_currToken->token->is_not(Token::Assign)) {
-		throw SyntaxError{"Expected \"=\", got \"" + _currToken->token->lexeme() + "\" instead."};
+	if (_currToken->token->is_not(Token::Assign)) {
+		throw SyntaxError{ "Expected \"=\", got \"" + _currToken->token->lexeme() + "\" instead." };
 	}
 	parseExpression();
 	return true;
@@ -177,7 +220,3 @@ bool Parser::parseIdentList() {
 	}
 	return true;
 }
-
-
-
-

@@ -22,7 +22,6 @@ class Lexer
 		Whitespace,
 		Newline,
 		Dot,
-		Sign,
 		Semicolon,
 		Parenthesis,
 		Operators,

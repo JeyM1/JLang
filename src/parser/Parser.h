@@ -72,6 +72,8 @@ class Parser
 	bool parseInp();
 	bool parseOut();
 	bool parseIdentList();
+	bool parseTerm();
+	bool parseFactor();
 };
 
 #endif //_PARSER_H_

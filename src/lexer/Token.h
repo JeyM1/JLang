@@ -92,18 +92,15 @@ class Token
 		Semicolon,
 
 		// 25
-		Sign,
-
-		// 26
 		Comma,
 
-		// 27
+		// 26
 		EOL,
 
-		// 28
+		// 27
 		FEOF,
 		
-		// 29
+		// 28
 		Unexpected
 	};
 
