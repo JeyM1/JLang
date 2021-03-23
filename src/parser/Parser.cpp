@@ -282,19 +282,6 @@ bool Parser::parseBoolFactor() {
 		parseBoolTerm();
 		parseToken(Token::RightParen);
 	}
-//	else if (
-//		_currToken->token->is_one_of(Token::Identifier, Token::BoolConst) &&
-//		std::next(_currToken) != _tokens.end() &&
-//		!std::next(_currToken)->token->is_one_of(
-//			Token::LessThan,
-//			Token::LessOrEqualTo,
-//			Token::EqualTo,
-//			Token::NotEqual,
-//			Token::GreaterOrEqualTo,
-//			Token::GreaterThan
-//		)) {
-//		++_currToken;
-//	}
 	else {
 		parseBoolRelation();
 	}
@@ -315,19 +302,6 @@ bool Parser::parseBoolRelation() {
 		++_currToken;
 		parseExpression();
 	}
-
-//	if (!_currToken->token->is_one_of(
-//		Token::LessThan,
-//		Token::LessOrEqualTo,
-//		Token::EqualTo,
-//		Token::NotEqual,
-//		Token::GreaterOrEqualTo,
-//		Token::GreaterThan)
-//		) {
-//		throw SyntaxError{ "Expected RelationOperator in BoolRelation." };
-//	}
-//	++_currToken;
-//	parseExpression();
 	return true;
 }
 
