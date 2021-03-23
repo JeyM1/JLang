@@ -1,6 +1,6 @@
 program Program1 {
     int a = 2;
-    double b = 3.14;
+    real b = 3.14;
     bool c = true;
     for (int i = 0 by i + 1 while i < 10) do {
         a = a + 1;

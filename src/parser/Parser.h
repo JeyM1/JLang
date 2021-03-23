@@ -81,6 +81,8 @@ class Parser
 	bool parseBoolFactor();
 	bool parseBoolRelation();
 	bool parseDoBlock();
+	bool parseForStatement();
+	bool parseType();
 };
 
 #endif //_PARSER_H_

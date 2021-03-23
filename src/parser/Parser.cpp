@@ -120,6 +120,8 @@ bool Parser::parseStatement() {
 		parseIdentifier();
 		parseToken(Token::Assign);
 		parseExpression();
+		parseToken(Token::Semicolon);
+		break;
 	}
 	case Token::Keyword: {
 		// Inp, Out or Declaration
@@ -134,19 +136,19 @@ bool Parser::parseStatement() {
 		else if (_currToken->token->lexeme() == "if") {
 			parseIfStatement();
 		}
-			// TODO: if and for
+		else if (_currToken->token->lexeme() == "for") {
+			parseForStatement();
+		}
 		else {
 			parseDeclaration();
 			parseToken(Token::Semicolon);
 		}
-
 		break;
 	}
 	case Token::RightCurly: {
 		// end of program
 		return false;
 	}
-
 	}
 	return true;
 }
@@ -186,7 +188,7 @@ bool Parser::parseFactor() {
 }
 
 bool Parser::parseFirstExpr() {
-	if (_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::Identifier)) {
+	if (_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::BoolConst, Token::Identifier)) {
 		++_currToken;
 	}
 	else if (_currToken->token->is(Token::LeftParen)) {
@@ -200,12 +202,17 @@ bool Parser::parseFirstExpr() {
 	return true;
 }
 
-bool Parser::parseDeclaration() {
+bool Parser::parseType() {
 	if (std::find(_types.begin(), _types.end(), _currToken->token->lexeme()) == _types.end()) {
 		// token is not Type
 		throw SyntaxError{ "Expected type in Declaration; got \"" + _currToken->token->lexeme() + "\" instead." };
 	}
 	++_currToken;
+	return true;
+}
+
+bool Parser::parseDeclaration() {
+	parseType();
 	parseIdentDecl();
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
@@ -275,19 +282,19 @@ bool Parser::parseBoolFactor() {
 		parseBoolTerm();
 		parseToken(Token::RightParen);
 	}
-	else if (
-		_currToken->token->is_one_of(Token::Identifier, Token::BoolConst) &&
-		std::next(_currToken) != _tokens.end() &&
-		!std::next(_currToken)->token->is_one_of(
-			Token::LessThan,
-			Token::LessOrEqualTo,
-			Token::EqualTo,
-			Token::NotEqual,
-			Token::GreaterOrEqualTo,
-			Token::GreaterThan
-		)) {
-		++_currToken;
-	}
+//	else if (
+//		_currToken->token->is_one_of(Token::Identifier, Token::BoolConst) &&
+//		std::next(_currToken) != _tokens.end() &&
+//		!std::next(_currToken)->token->is_one_of(
+//			Token::LessThan,
+//			Token::LessOrEqualTo,
+//			Token::EqualTo,
+//			Token::NotEqual,
+//			Token::GreaterOrEqualTo,
+//			Token::GreaterThan
+//		)) {
+//		++_currToken;
+//	}
 	else {
 		parseBoolRelation();
 	}
@@ -297,7 +304,7 @@ bool Parser::parseBoolFactor() {
 
 bool Parser::parseBoolRelation() {
 	parseExpression();
-	if (!_currToken->token->is_one_of(
+	if (_currToken->token->is_one_of(
 		Token::LessThan,
 		Token::LessOrEqualTo,
 		Token::EqualTo,
@@ -305,10 +312,22 @@ bool Parser::parseBoolRelation() {
 		Token::GreaterOrEqualTo,
 		Token::GreaterThan)
 		) {
-		throw SyntaxError{ "Expected RelationOperator in BoolRelation." };
+		++_currToken;
+		parseExpression();
 	}
-	++_currToken;
-	parseExpression();
+
+//	if (!_currToken->token->is_one_of(
+//		Token::LessThan,
+//		Token::LessOrEqualTo,
+//		Token::EqualTo,
+//		Token::NotEqual,
+//		Token::GreaterOrEqualTo,
+//		Token::GreaterThan)
+//		) {
+//		throw SyntaxError{ "Expected RelationOperator in BoolRelation." };
+//	}
+//	++_currToken;
+//	parseExpression();
 	return true;
 }
 
@@ -340,3 +359,20 @@ bool Parser::parseIfStatement() {
 	}
 	return true;
 }
+
+bool Parser::parseForStatement() {
+	parseKeyword("for");
+	parseToken(Token::LeftParen);
+	// IndExpr
+	parseDeclaration();
+	parseKeyword("by");
+	parseExpression();
+	parseKeyword("while");
+	parseBoolExpr();
+	parseToken(Token::RightParen);
+	parseKeyword("do");
+	parseDoBlock();
+	return true;
+}
+
+
