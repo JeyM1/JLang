@@ -2,6 +2,7 @@
 #include <fstream>
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
+#include "rpn_interpreter/RPNInterpreter.h"
 
 
 int main() {
@@ -24,12 +25,15 @@ int main() {
 		std::cerr << "Parser error" << std::endl;
 		exit(1);
 	}
-
-	auto tokens = parser.getParsedTokens();
-	for(auto token : tokens) {
+	std::cout << "RPN of the code:" << std::endl;
+	auto rpn_tokens = parser.getParsedTokens();
+	for(const auto& token : rpn_tokens) {
 		std::cout << token->lexeme() << " ";
 	}
 	std::cout << std::endl;
+
+	RPNInterpreter interpreter{};
+	interpreter.interpret(rpn_tokens);
 
 	return 0;
 }
