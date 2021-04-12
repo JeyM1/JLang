@@ -28,4 +28,4 @@ add_executable(
         src/parser/tree/Tree.h
         src/parser/exceptions/SyntaxError.cpp
         src/parser/exceptions/SyntaxError.h
-        src/rpn_interpreter/RPNInterpreter.cpp src/rpn_interpreter/RPNInterpreter.h src/rpn_interpreter/exceptions/RunTimeError.cpp src/rpn_interpreter/exceptions/RunTimeError.h)
+        src/rpn_interpreter/RPNInterpreter.cpp src/rpn_interpreter/RPNInterpreter.h src/rpn_interpreter/exceptions/RunTimeError.cpp src/rpn_interpreter/exceptions/RunTimeError.h src/lexer/IdentifierToken.cpp src/lexer/IdentifierToken.h)

@@ -13,6 +13,7 @@
 #include "IntConstToken.h"
 #include "RealConstToken.h"
 #include "../logger.h"
+#include "IdentifierToken.h"
 
 
 using ClassOfChar = Lexer::ClassOfChar;
@@ -91,13 +92,20 @@ const std::map<
 	    std::shared_ptr<Token> token = Token::getLanguageToken(lexeme);
 	    if (token->is(Token::Unexpected)) {
 		    // token is not Language-in, its identifier
-		    auto it = std::find(instance.identifiers.begin(), instance.identifiers.end(), lexeme);
+		    auto it = std::find_if(instance.identifiers.begin(), instance.identifiers
+		                                                                 .end(), [lexeme]( auto identifier ) {
+			  return identifier->lexeme() == lexeme;
+		    });
 		    if (it == instance.identifiers.end()) {
 			    // not found identifier in table
-			    instance.identifiers.push_back(lexeme);
+			    auto identifier = std::make_shared<IdentifierToken>(lexeme, it - instance.identifiers.begin());
+			    instance.identifiers.push_back(identifier);
+			    token = identifier;
+		    }
+		    else {
+			    token = *it;
 		    }
 
-		    token = std::make_shared<Token>(Token::Type::Identifier, lexeme);
 	    }
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
@@ -168,7 +176,7 @@ const std::map<
 	// Other junk
 	{ 14,
 	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
-	    std::shared_ptr<Token> token = Token::getLanguageToken(std::string{lexeme + currChar});
+	    std::shared_ptr<Token> token = Token::getLanguageToken(std::string{ lexeme + currChar });
 	    if (token->is(Token::Unexpected)) {
 		    // operator token not found
 		    std::cerr.flush();
@@ -267,8 +275,7 @@ void Lexer::printTokenTable() {
 			std::cout << "\tactual: " << std::dynamic_pointer_cast<IntConstToken>(lineToken.token)->actual();
 		}
 		else if (lineToken.token->is(Token::Type::Identifier)) {
-			std::cout << "\tid: " << std::find(identifiers.begin(), identifiers.end(), lineToken.token->lexeme())
-			                         - identifiers.begin();
+			std::cout << "\tid: " << std::dynamic_pointer_cast<IdentifierToken>(lineToken.token)->id();
 		}
 		std::cout << std::endl;
 	}
@@ -278,6 +285,6 @@ const std::vector<Lexer::LineToken>& Lexer::getTokens() const {
 	return tokens;
 }
 
-const std::vector<std::string>& Lexer::getIdentifiers() const {
+const std::vector<std::shared_ptr<IdentifierToken>>& Lexer::getIdentifiers() const {
 	return identifiers;
 }

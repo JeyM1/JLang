@@ -15,10 +15,14 @@ using CurrentToken = std::vector<Lexer::LineToken>::const_iterator;
 
 class RPNInterpreter
 {
+  protected:
 	CurrentToken _currToken{};
+	std::vector<Lexer::LineToken> _tokens{};
+	std::vector<std::shared_ptr<IdentifierToken>> _identifiers;
 
   public:
-	bool interpret(std::vector<Lexer::LineToken> tokens);
+	bool interpret( const std::vector<Lexer::LineToken>& tokens,
+	                const std::vector<std::shared_ptr<IdentifierToken>>& identifiers );
 };
 
 #endif //_RPNINTERPRETER_H_

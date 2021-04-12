@@ -6,11 +6,11 @@
 #include <string>
 #include "utils.h"
 
-// Utility function to find minimum of three numbers
-int min(int x, int y, int z) { return std::min(std::min(x, y), z); }
 
-int editDist( const std::string& str1, const std::string& str2, int m, int n )
-{
+// Utility function to find minimum of three numbers
+int min( int x, int y, int z ) { return std::min(std::min(x, y), z); }
+
+int editDist( const std::string& str1, const std::string& str2, int m, int n ) {
 	// If first string is empty, the only option is to
 	// insert all characters of second string into first
 	if (m == 0)

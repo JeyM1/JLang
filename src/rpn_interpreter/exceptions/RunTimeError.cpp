@@ -4,6 +4,7 @@
 
 #include "RunTimeError.h"
 
+
 RunTimeError::RunTimeError( const std::string& message ) :
 	_message(std::move("RunTimeError: " + message)) {}
 

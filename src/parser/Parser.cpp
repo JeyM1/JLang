@@ -13,7 +13,8 @@ Parser::Parser() {}
 
 const std::vector<std::string> Parser::_types = { "int", "real", "bool" };
 
-bool Parser::parse( const std::vector<Lexer::LineToken>& tokens, const std::vector<std::string>& identifiers ) {
+bool
+Parser::parse( const std::vector<Lexer::LineToken>& tokens, const std::vector<std::shared_ptr<IdentifierToken>>& identifiers ) {
 	this->_currToken = tokens.begin();
 	this->_tokens = tokens;
 	this->_identifiers = identifiers;
@@ -86,7 +87,7 @@ bool Parser::parseIdentifier() {
 //		token->lexeme()) == _declaredIdentifiers.end()) {
 //		throw SyntaxError{ "Undeclared variable " + token->lexeme() };
 //	}
-	this->postfixTokens.push_back(_currToken->token);
+	this->postfixTokens.push_back(*_currToken);
 
 	++this->_currToken;
 
@@ -156,9 +157,9 @@ bool Parser::parseAssign() {
 	// Assign
 	parseIdentifier();
 	parseToken(Token::Assign);
-	auto assignToken = std::prev(_currToken)->token;
+	auto assignToken = std::prev(_currToken);
 	parseExpression();
-	this->postfixTokens.push_back(assignToken);
+	this->postfixTokens.push_back(*assignToken);
 	parseToken(Token::Semicolon);
 	return true;
 }
@@ -216,24 +217,24 @@ bool Parser::parseBoolRelation() {
 }
 
 bool Parser::parseExpression() {
-	bool hasSign = false;
+	unsigned int signLine = 0;
 	// [Sign]
 	if (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
 		// TODO: set sign somewhere
+		signLine = _currToken->line;
 		++_currToken;
-		hasSign = true;
 	}
 	// Term
 	parseTerm();
-	if (hasSign) {
-		this->postfixTokens.push_back(std::make_shared<Token>(Token::Type::Sign, "@"));
+	if (signLine > 0) {
+		this->postfixTokens.emplace_back(signLine, std::make_shared<Token>(Token::Type::Sign, "@"));
 	}
 	// { AddOp Term }
 	while (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
-		auto parsedToken = _currToken->token;
+		auto parsedToken = _currToken;
 		++_currToken;
 		parseTerm();
-		this->postfixTokens.push_back(parsedToken);
+		this->postfixTokens.push_back(*parsedToken);
 	}
 	return true;
 }
@@ -241,10 +242,10 @@ bool Parser::parseExpression() {
 bool Parser::parseTerm() {
 	parseFactor();
 	while (_currToken->token->is_one_of(Token::Multiply, Token::Division, Token::IntDivision)) {
-		auto parsedToken = _currToken->token;
+		auto parsedToken = _currToken;
 		++_currToken;
 		parseFactor();
-		this->postfixTokens.push_back(parsedToken);
+		this->postfixTokens.push_back(*parsedToken);
 	}
 	return true;
 }
@@ -252,17 +253,17 @@ bool Parser::parseTerm() {
 bool Parser::parseFactor() {
 	parseFirstExpr();
 	while (_currToken->token->is(Token::Power)) {
-		auto parsedToken = _currToken->token;
+		auto parsedToken = _currToken;
 		++_currToken;
 		parseFirstExpr();
-		this->postfixTokens.push_back(parsedToken);
+		this->postfixTokens.push_back(*parsedToken);
 	}
 	return true;
 }
 
 bool Parser::parseFirstExpr() {
 	if (_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::BoolConst)) {
-		this->postfixTokens.push_back(_currToken->token);
+		this->postfixTokens.push_back(*_currToken);
 		++_currToken;
 	}
 	else if (_currToken->token->is(Token::Identifier)) {
@@ -290,22 +291,22 @@ bool Parser::parseType() {
 
 bool Parser::parseInitialization() {
 	parseType();
-	auto typeToken = std::prev(_currToken)->token;
-	parseIdentDecl(typeToken);
+	auto typeToken = std::prev(_currToken);
+	parseIdentDecl(*typeToken);
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
-		parseIdentDecl(typeToken);
+		parseIdentDecl(*typeToken);
 	}
 	return true;
 }
 
-bool Parser::parseIdentDecl( const std::shared_ptr<Token>& typeToken ) {
+bool Parser::parseIdentDecl( const Lexer::LineToken& typeToken ) {
 	this->postfixTokens.push_back(typeToken);
 	parseIdentifier();
 	parseToken(Token::Assign);
-	auto assignToken = std::prev(_currToken)->token;
+	auto assignToken = std::prev(_currToken);
 	parseExpression();
-	this->postfixTokens.push_back(assignToken);
+	this->postfixTokens.push_back(*assignToken);
 	return true;
 }
 

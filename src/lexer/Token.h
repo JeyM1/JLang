@@ -105,7 +105,7 @@ class Token
 
 		// 29
 		FEOF,
-		
+
 		// 30
 		Unexpected
 	};

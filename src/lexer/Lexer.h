@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 #include "Token.h"
+#include "IdentifierToken.h"
 
 
 class Lexer
@@ -46,7 +47,7 @@ class Lexer
 	> finalStateProcessingFunctions;
 
 	std::vector<LineToken> tokens;
-	std::vector<std::string> identifiers;
+	std::vector<std::shared_ptr<IdentifierToken>> identifiers;
 
 	bool isLastLexSuccess = true;
 	static const unsigned int initialState{ 0 };
@@ -60,7 +61,7 @@ class Lexer
 	void printTokenTable();
 
 	const std::vector<LineToken>& getTokens() const;
-	const std::vector<std::string>& getIdentifiers() const;
+	const std::vector<std::shared_ptr<IdentifierToken>>& getIdentifiers() const;
 
 };
 

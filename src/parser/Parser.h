@@ -15,34 +15,38 @@ class Parser
 {
 	CurrentToken _currToken{};
 	std::vector<Lexer::LineToken> _tokens;
-	std::vector<std::string> _identifiers;
-	std::vector<std::string> _declaredIdentifiers;
+	std::vector<std::shared_ptr<IdentifierToken>> _identifiers;
 
 	static const std::vector<std::string> _types;
 
-	std::vector<std::shared_ptr<Token>> postfixTokens;
+	std::vector<Lexer::LineToken> postfixTokens;
 
   public:
 	Parser();
 
-	const std::vector<std::shared_ptr<Token>>& getParsedTokens() const {
+	const std::vector<Lexer::LineToken>& getParsedTokens() const {
 		return postfixTokens;
 	}
 
-	bool parse(const std::vector<Lexer::LineToken>& tokens, const std::vector<std::string>& identifiers);
+	const std::vector<std::shared_ptr<IdentifierToken>>& getIdentifiers() const {
+		return _identifiers;
+	}
+
+	bool
+	parse( const std::vector<Lexer::LineToken>& tokens, const std::vector<std::shared_ptr<IdentifierToken>>& identifiers );
 
 	bool parseProgram();
 
-	bool parseToken(Token::Type type);
-	bool parseIdentifierById( unsigned int id);
+	bool parseToken( Token::Type type );
+	bool parseIdentifierById( unsigned int id );
 	bool parseIdentifier();
-	bool parseKeyword(const std::string& keyword);
+	bool parseKeyword( const std::string& keyword );
 
 	bool parseStatementList();
 	bool parseStatement();
 	bool parseExpression();
 	bool parseInitialization();
-	bool parseIdentDecl(const std::shared_ptr<Token>&);
+	bool parseIdentDecl( const Lexer::LineToken& );
 	bool parseInp();
 	bool parseOut();
 	bool parseIdentList();
