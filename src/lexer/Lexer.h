@@ -25,6 +25,7 @@ class Lexer
 		Semicolon,
 		Parenthesis,
 		Operators,
+		Comma,
 		FEOF,
 		Other
 	};

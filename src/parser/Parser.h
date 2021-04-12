@@ -19,40 +19,15 @@ class Parser
 	std::vector<std::string> _declaredIdentifiers;
 
 	static const std::vector<std::string> _types;
-	enum TYPE {
-		PROGRAM,
-		EMPTY,
-		SEQUENCE,
-		EXPRESSION,
 
-		INT,
-		REAL,
-		BOOL,
-
-		SET,
-
-		IF,
-		IFELSE,
-		WHILE,
-		FOR,
-		DO,
-
-		ADD,
-		SUBTRACT,
-		MULTIPLY,
-		DIVIDE,
-
-		LESS,
-		GREATER,
-		LESS_EQUAL,
-		GREATER_EQUAL,
-		EQUAL,
-		NOT_EQUAL,
-	};
-	Tree<TYPE> parsedTree;
+	std::vector<std::shared_ptr<Token>> postfixTokens;
 
   public:
 	Parser();
+
+	const std::vector<std::shared_ptr<Token>>& getParsedTokens() const {
+		return postfixTokens;
+	}
 
 	bool parse(const std::vector<Lexer::LineToken>& tokens, const std::vector<std::string>& identifiers);
 
@@ -67,8 +42,7 @@ class Parser
 	bool parseStatement();
 	bool parseExpression();
 	bool parseInitialization();
-	bool parseIdentDecl();
-	bool parseComma();
+	bool parseIdentDecl(const std::shared_ptr<Token>&);
 	bool parseInp();
 	bool parseOut();
 	bool parseIdentList();
@@ -83,6 +57,7 @@ class Parser
 	bool parseDoBlock();
 	bool parseForStatement();
 	bool parseType();
+	bool parseAssign();
 };
 
 #endif //_PARSER_H_

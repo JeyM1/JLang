@@ -26,6 +26,7 @@ const std::map<ClassOfChar, std::string> Lexer::charClasses = {
 	{ Semicolon, ";" },
 	{ Parenthesis, "{}()" },
 	{ Operators, "+-!=*/<>&|" },
+	{ Comma, "," },
 };
 
 const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateTransitionFn = {
@@ -48,6 +49,9 @@ const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> Lexer::stateT
 
 	// Whitespace
 	{{ 0, Whitespace }, 0 },
+
+	// Comma
+	{{ 0, Comma }, 14 },
 
 	// NewLine
 	{{ 0, Newline }, 9 },
@@ -158,6 +162,21 @@ const std::map<
 	    }
 	    instance.tokens.emplace_back(currLine, token);
 	    in.unget();
+	  }
+	},
+
+	// Other junk
+	{ 14,
+	  []( std::istream& in, const std::string& lexeme, char currChar, unsigned int& currLine, Lexer& instance ) {
+	    std::shared_ptr<Token> token = Token::getLanguageToken(std::string{lexeme + currChar});
+	    if (token->is(Token::Unexpected)) {
+		    // operator token not found
+		    std::cerr.flush();
+		    std::cerr << "Unexpected token \"" << lexeme << "\" on line " << currLine << std::endl;
+		    std::cerr << "Did you mean \"" << Token::getClosestLanguageToken(lexeme) << "\"?" << std::endl;
+		    instance.isLastLexSuccess = false;
+	    }
+	    instance.tokens.emplace_back(currLine, token);
 	  }
 	},
 

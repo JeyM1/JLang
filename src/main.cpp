@@ -25,5 +25,11 @@ int main() {
 		exit(1);
 	}
 
+	auto tokens = parser.getParsedTokens();
+	for(auto token : tokens) {
+		std::cout << token->lexeme() << " ";
+	}
+	std::cout << std::endl;
+
 	return 0;
 }

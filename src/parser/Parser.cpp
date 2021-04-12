@@ -50,7 +50,7 @@ bool Parser::parseKeyword( const std::string& keyword ) {
 	if (token->is_not(Token::Keyword) || token->lexeme() != keyword) {
 		throw SyntaxError{
 			"Expected keyword \"" + keyword + "\", got \"" + token->lexeme() +
-			"\" instead."
+			"\" (type " + std::to_string(token->type()) + ") instead."
 		};
 	}
 	++this->_currToken;
@@ -86,6 +86,7 @@ bool Parser::parseIdentifier() {
 //		token->lexeme()) == _declaredIdentifiers.end()) {
 //		throw SyntaxError{ "Undeclared variable " + token->lexeme() };
 //	}
+	this->postfixTokens.push_back(_currToken->token);
 
 	++this->_currToken;
 
@@ -116,11 +117,7 @@ bool Parser::parseStatementList() {
 bool Parser::parseStatement() {
 	switch (_currToken->token->type()) {
 	case Token::Identifier: {
-		// Assign
-		parseIdentifier();
-		parseToken(Token::Assign);
-		parseExpression();
-		parseToken(Token::Semicolon);
+		parseAssign();
 		break;
 	}
 	case Token::Keyword: {
@@ -140,6 +137,8 @@ bool Parser::parseStatement() {
 			parseForStatement();
 		}
 		else {
+			// push init type (int, real, bool)
+//			this->postfixTokens.push_back(_currToken->token);
 			parseInitialization();
 			parseToken(Token::Semicolon);
 		}
@@ -150,6 +149,17 @@ bool Parser::parseStatement() {
 		return false;
 	}
 	}
+	return true;
+}
+
+bool Parser::parseAssign() {
+	// Assign
+	parseIdentifier();
+	parseToken(Token::Assign);
+	auto assignToken = std::prev(_currToken)->token;
+	parseExpression();
+	this->postfixTokens.push_back(assignToken);
+	parseToken(Token::Semicolon);
 	return true;
 }
 
@@ -206,17 +216,24 @@ bool Parser::parseBoolRelation() {
 }
 
 bool Parser::parseExpression() {
+	bool hasSign = false;
 	// [Sign]
 	if (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
 		// TODO: set sign somewhere
 		++_currToken;
+		hasSign = true;
 	}
 	// Term
 	parseTerm();
+	if (hasSign) {
+		this->postfixTokens.push_back(std::make_shared<Token>(Token::Type::Sign, "@"));
+	}
 	// { AddOp Term }
 	while (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
+		auto parsedToken = _currToken->token;
 		++_currToken;
-		parseExpression();
+		parseTerm();
+		this->postfixTokens.push_back(parsedToken);
 	}
 	return true;
 }
@@ -224,8 +241,10 @@ bool Parser::parseExpression() {
 bool Parser::parseTerm() {
 	parseFactor();
 	while (_currToken->token->is_one_of(Token::Multiply, Token::Division, Token::IntDivision)) {
+		auto parsedToken = _currToken->token;
 		++_currToken;
-		parseExpression();
+		parseFactor();
+		this->postfixTokens.push_back(parsedToken);
 	}
 	return true;
 }
@@ -233,15 +252,21 @@ bool Parser::parseTerm() {
 bool Parser::parseFactor() {
 	parseFirstExpr();
 	while (_currToken->token->is(Token::Power)) {
+		auto parsedToken = _currToken->token;
 		++_currToken;
-		parseExpression();
+		parseFirstExpr();
+		this->postfixTokens.push_back(parsedToken);
 	}
 	return true;
 }
 
 bool Parser::parseFirstExpr() {
-	if (_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::BoolConst, Token::Identifier)) {
+	if (_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::BoolConst)) {
+		this->postfixTokens.push_back(_currToken->token);
 		++_currToken;
+	}
+	else if (_currToken->token->is(Token::Identifier)) {
+		parseIdentifier();
 	}
 	else if (_currToken->token->is(Token::LeftParen)) {
 		parseToken(Token::LeftParen);
@@ -265,18 +290,22 @@ bool Parser::parseType() {
 
 bool Parser::parseInitialization() {
 	parseType();
-	parseIdentDecl();
+	auto typeToken = std::prev(_currToken)->token;
+	parseIdentDecl(typeToken);
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
-		parseIdentDecl();
+		parseIdentDecl(typeToken);
 	}
 	return true;
 }
 
-bool Parser::parseIdentDecl() {
+bool Parser::parseIdentDecl( const std::shared_ptr<Token>& typeToken ) {
+	this->postfixTokens.push_back(typeToken);
 	parseIdentifier();
 	parseToken(Token::Assign);
+	auto assignToken = std::prev(_currToken)->token;
 	parseExpression();
+	this->postfixTokens.push_back(assignToken);
 	return true;
 }
 
@@ -348,5 +377,3 @@ bool Parser::parseForStatement() {
 	parseDoBlock();
 	return true;
 }
-
-
