@@ -13,8 +13,8 @@ Parser::Parser() {}
 
 const std::vector<std::string> Parser::_types = { "int", "real", "bool" };
 
-bool
-Parser::parse( const std::vector<Lexer::LineToken>& tokens, const std::vector<std::shared_ptr<IdentifierToken>>& identifiers ) {
+bool Parser::parse( const std::vector<Lexer::LineToken>& tokens,
+                    const std::vector<std::shared_ptr<IdentifierToken>>& identifiers ) {
 	this->_currToken = tokens.begin();
 	this->_tokens = tokens;
 	this->_identifiers = identifiers;
@@ -82,11 +82,6 @@ bool Parser::parseIdentifier() {
 	if (token->is_not(Token::Identifier)) {
 		throw SyntaxError{ "Expected identifier, got " + std::to_string(token->type()) };
 	}
-//	if (std::find(_declaredIdentifiers.begin(),
-//		_declaredIdentifiers.end(),
-//		token->lexeme()) == _declaredIdentifiers.end()) {
-//		throw SyntaxError{ "Undeclared variable " + token->lexeme() };
-//	}
 	this->postfixTokens.push_back(*_currToken);
 
 	++this->_currToken;
