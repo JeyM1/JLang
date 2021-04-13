@@ -6,20 +6,28 @@
 #define _INTCONSTTOKEN_H_
 
 #include "Token.h"
+#include "../rpn_interpreter/VariableType.h"
 
 
 class IntConstToken : public Token
 {
+  public:
+	typedef int CTYPE;
+
   protected:
-	int _actual;
+	std::shared_ptr<CTYPE> _actual;
 
   public:
 	explicit IntConstToken( const std::string& lexeme );
+	explicit IntConstToken( const CTYPE& actual );
 
-	int actual() const {
+	virtual std::shared_ptr<void> actual() const override {
 		return _actual;
 	}
 
+	virtual VariableType variableType() const override {
+		return VariableType::INT;
+	}
 };
 
 #endif //_INTCONSTTOKEN_H_

@@ -9,7 +9,7 @@ int main() {
 	std::ifstream inputFile{ "test.jlang" };
 	Lexer lexer{};
 	lexer.lex(inputFile);
-	lexer.printTokenTable();
+//	lexer.printTokenTable();
 	std::cout << "Lexer success status: " << lexer.isLastLexSuccess << std::endl;
 
 	if (!lexer.isLastLexSuccess) {
@@ -33,7 +33,19 @@ int main() {
 	std::cout << std::endl;
 
 	RPNInterpreter interpreter{};
-	interpreter.interpret(rpn_tokens, parser.getIdentifiers());
+	if (interpreter.interpret(rpn_tokens, parser.getIdentifiers())) {
+		std::cout << "Interpreter success status: 1" << std::endl;
+	}
+	else {
+		std::cerr << "Interpreter error" << std::endl;
+		exit(1);
+	}
+
+	std::cout << "Identifiers table: " << std::endl;
+	const auto& identifiers = interpreter.getIdentifiers();
+	for(const auto& identifier : identifiers) {
+		std::cout << *identifier << std::endl;
+	}
 
 	return 0;
 }

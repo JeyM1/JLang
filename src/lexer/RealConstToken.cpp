@@ -7,7 +7,7 @@
 
 RealConstToken::RealConstToken( const std::string& lexeme ) : Token(Type::RealConst, lexeme) {
 	try {
-		this->_actual = std::stold(lexeme);
+		this->_actual = std::make_shared<CTYPE>(std::stold(lexeme));
 	}
 	catch (...) {
 		// TODO: generate error
@@ -15,3 +15,7 @@ RealConstToken::RealConstToken( const std::string& lexeme ) : Token(Type::RealCo
 		std::cerr << "Unexpected RealConst" << std::endl;
 	}
 }
+
+RealConstToken::RealConstToken( const CTYPE& actual ) :
+	Token(Token::Type::BoolConst, std::to_string(actual)),
+	_actual(std::make_shared<CTYPE>(actual)) {}

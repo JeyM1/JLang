@@ -6,41 +6,32 @@
 #define _IDENTIFIERTOKEN_H_
 
 #include "Token.h"
+#include "../rpn_interpreter/VariableType.h"
 
 
 class IdentifierToken : public Token
 {
-  public:
-	enum Type
-	{
-		INT,
-		REAL,
-		BOOL,
-		UNDEFINED
-	};
-
   protected:
-	IdentifierToken::Type _identifierType;
-	std::shared_ptr<void> _value;
+	VariableType _variableType;
+	std::shared_ptr<void> _actual;
 	unsigned int _id;
 
   public:
 	IdentifierToken( const std::string& lexeme, unsigned int id );
-	void setIdentifierType( IdentifierToken::Type type );
-	void setValue( std::shared_ptr<void> value );
+	void setVariableType( VariableType type );
+	void setActual( std::shared_ptr<void> value, VariableType from );
 
-	Type identifierType() const {
-		return _identifierType;
+	VariableType variableType() const override {
+		return _variableType;
 	}
 
-	const std::shared_ptr<void>& value() const {
-		return _value;
-	}
+	std::shared_ptr<void> actual() const override;
 
 	unsigned int id() const {
 		return _id;
 	}
 
+	friend std::ostream& operator<<( std::ostream& os, const IdentifierToken& token );
 };
 
 #endif //_IDENTIFIERTOKEN_H_

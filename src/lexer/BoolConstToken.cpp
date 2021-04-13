@@ -9,13 +9,16 @@
 BoolConstToken::BoolConstToken( const std::string& lexeme )
 	: Token(Token::Type::BoolConst, lexeme) {
 	if (lexeme == "true") {
-		_actual = true;
+		_actual = std::make_shared<CTYPE>(true);
 	}
 	else if (lexeme == "false") {
-		_actual = false;
+		_actual = std::make_shared<CTYPE>(false);
 	}
 	else {
 		std::cerr << "Unexpected BoolConstToken, got \"" << lexeme << "\"." << std::endl;
 	}
-
 }
+
+BoolConstToken::BoolConstToken( const BoolConstToken::CTYPE& actual ) :
+	Token(Token::Type::BoolConst, std::to_string(actual)),
+	_actual(std::make_shared<CTYPE>(actual)) {}

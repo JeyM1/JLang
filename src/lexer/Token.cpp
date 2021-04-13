@@ -12,6 +12,7 @@
 #include "BoolConstToken.h"
 #include "../logger.h"
 #include "../utils.h"
+#include "../rpn_interpreter/exceptions/RunTimeError.h"
 
 
 using Type = Token::Type;
@@ -109,4 +110,12 @@ std::string Token::getClosestLanguageToken( const std::string& lexeme ) {
 	}
 
 	return *closest;
+}
+
+std::shared_ptr<void> Token::actual() const {
+	throw RunTimeError{"TOKEN IS NOT VARIABLE."};
+}
+
+VariableType Token::variableType() const {
+	throw RunTimeError{"TOKEN IS NOT VARIABLE."};
 }

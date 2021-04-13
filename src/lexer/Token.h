@@ -9,6 +9,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include "../rpn_interpreter/VariableType.h"
 
 
 class Token
@@ -123,6 +124,9 @@ class Token
 	Type type() const noexcept { return _type; }
 
 	void setType( Type t ) noexcept { _type = t; }
+
+	virtual std::shared_ptr<void> actual() const;
+	virtual VariableType variableType() const;
 
 	const std::string& lexeme() const { return _lexeme; }
 

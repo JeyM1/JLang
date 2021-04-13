@@ -8,7 +8,7 @@
 IntConstToken::IntConstToken( const std::string& lexeme )
 	: Token(Type::IntConst, lexeme) {
 	try {
-		this->_actual = std::stoi(lexeme);
+		this->_actual = std::make_shared<CTYPE>(std::stoi(lexeme));
 	}
 	catch (...) {
 		// TODO: generate error
@@ -17,3 +17,8 @@ IntConstToken::IntConstToken( const std::string& lexeme )
 	}
 
 }
+
+IntConstToken::IntConstToken( const CTYPE& actual ) :
+	Token(Token::Type::IntConst, std::to_string(actual)),
+	_actual(std::make_shared<CTYPE>(actual)) {}
+

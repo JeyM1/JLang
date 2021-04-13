@@ -202,6 +202,7 @@ const std::map<
 };
 
 Lexer::LineToken::LineToken( unsigned int line, std::shared_ptr<Token> token ) : line(line), token(std::move(token)) {}
+Lexer::LineToken::LineToken(unsigned int line) : line(line) {}
 
 Lexer::Lexer() {}
 
@@ -266,13 +267,13 @@ void Lexer::printTokenTable() {
 		std::cout << std::setw(3) << lineToken.line << " | " << "type: " << lineToken.token->type()
 		          << "\tlexeme: " << lineToken.token->lexeme();
 		if (lineToken.token->is(Token::Type::BoolConst)) {
-			std::cout << "\tactual: " << std::dynamic_pointer_cast<BoolConstToken>(lineToken.token)->actual();
+			std::cout << "\tactual: " << *std::static_pointer_cast<BoolConstToken::CTYPE>(lineToken.token->actual());
 		}
 		else if (lineToken.token->is(Token::Type::RealConst)) {
-			std::cout << "\tactual: " << std::dynamic_pointer_cast<RealConstToken>(lineToken.token)->actual();
+			std::cout << "\tactual: " << *std::static_pointer_cast<RealConstToken::CTYPE>(lineToken.token->actual());
 		}
 		else if (lineToken.token->is(Token::Type::IntConst)) {
-			std::cout << "\tactual: " << std::dynamic_pointer_cast<IntConstToken>(lineToken.token)->actual();
+			std::cout << "\tactual: " << *std::static_pointer_cast<IntConstToken::CTYPE>(lineToken.token->actual());
 		}
 		else if (lineToken.token->is(Token::Type::Identifier)) {
 			std::cout << "\tid: " << std::dynamic_pointer_cast<IdentifierToken>(lineToken.token)->id();

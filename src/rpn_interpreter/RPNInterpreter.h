@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <memory>
+#include <stack>
 #include "../lexer/Token.h"
 #include "../lexer/Lexer.h"
 
@@ -15,14 +16,23 @@ using CurrentToken = std::vector<Lexer::LineToken>::const_iterator;
 
 class RPNInterpreter
 {
+  public:
+	static const std::map<std::string, VariableType> variableTypes;
   protected:
 	CurrentToken _currToken{};
 	std::vector<Lexer::LineToken> _tokens{};
 	std::vector<std::shared_ptr<IdentifierToken>> _identifiers;
+	std::stack<Lexer::LineToken> global_stack{};
 
   public:
 	bool interpret( const std::vector<Lexer::LineToken>& tokens,
 	                const std::vector<std::shared_ptr<IdentifierToken>>& identifiers );
+	bool postfixProcessing();
+	void processAssign();
+	void processBinary();
+	void processInitialization();
+
+	const std::vector<std::shared_ptr<IdentifierToken>>& getIdentifiers() const;
 };
 
 #endif //_RPNINTERPRETER_H_

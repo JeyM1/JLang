@@ -38,6 +38,7 @@ class Lexer
 		unsigned int line;
 
 		explicit LineToken( unsigned int, std::shared_ptr<Token> token );
+		explicit LineToken( unsigned int );
 	};
 
 	static const std::map<std::pair<unsigned int, ClassOfChar>, unsigned int> stateTransitionFn;
