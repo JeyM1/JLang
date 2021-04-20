@@ -55,6 +55,9 @@ bool RPNInterpreter::postfixProcessing() {
 				)) {
 				processBinary();
 			}
+			else if (token.token->is(Token::Sign)) {
+				processUnary();
+			}
 			else if (token.token->is(Token::Keyword)) {
 				// variable initialization
 				processInitialization();
@@ -453,4 +456,29 @@ void RPNInterpreter::processInitialization() {
 
 const std::vector<std::shared_ptr<IdentifierToken>>& RPNInterpreter::getIdentifiers() const {
 	return _identifiers;
+}
+
+void RPNInterpreter::processUnary() {
+	Lexer::LineToken operand = global_stack.top();
+	global_stack.pop();
+
+	// TODO: plus sign
+
+	Lexer::LineToken resVal{ operand.line };
+	std::shared_ptr<void> operandVal = operand.token->actual();
+	switch (operand.token->variableType()) {
+
+	case INT:
+		resVal.token = std::make_shared<IntConstToken>(-*std::static_pointer_cast<IntConstToken::CTYPE>(operandVal));
+		break;
+	case REAL:
+		resVal.token = std::make_shared<RealConstToken>(-*std::static_pointer_cast<RealConstToken::CTYPE>(operandVal));
+		break;
+	case BOOL:
+		throw RunTimeError{ "Bad operand type for Sign operator!" };
+	case UNDEFINED:
+		throw RunTimeError{ "Undefined variable" };
+	}
+
+	global_stack.push(resVal);
 }

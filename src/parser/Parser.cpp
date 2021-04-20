@@ -215,7 +215,6 @@ bool Parser::parseExpression() {
 	unsigned int signLine = 0;
 	// [Sign]
 	if (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
-		// TODO: set sign somewhere
 		signLine = _currToken->line;
 		++_currToken;
 	}

@@ -33,6 +33,7 @@ class RPNInterpreter
 	void processInitialization();
 
 	const std::vector<std::shared_ptr<IdentifierToken>>& getIdentifiers() const;
+	void processUnary();
 };
 
 #endif //_RPNINTERPRETER_H_
