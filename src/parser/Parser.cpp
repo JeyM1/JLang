@@ -153,7 +153,7 @@ bool Parser::parseAssign() {
 	parseIdentifier();
 	parseToken(Token::Assign);
 	auto assignToken = std::prev(_currToken);
-	parseExpression();
+	parseBoolExpr();
 	this->postfixTokens.push_back(*assignToken);
 	parseToken(Token::Semicolon);
 	return true;
@@ -162,8 +162,10 @@ bool Parser::parseAssign() {
 bool Parser::parseBoolExpr() {
 	parseBoolTerm();
 	while (_currToken->token->is(Token::Or)) {
+		auto parsedToken = *_currToken;
 		++_currToken;
 		parseBoolTerm();
+		this->postfixTokens.emplace_back(parsedToken);
 	}
 	return true;
 }
@@ -171,21 +173,25 @@ bool Parser::parseBoolExpr() {
 bool Parser::parseBoolTerm() {
 	parseBoolFactor();
 	while (_currToken->token->is(Token::And)) {
+		auto parsedToken = *_currToken;
 		++_currToken;
 		parseBoolFactor();
+		this->postfixTokens.emplace_back(parsedToken);
 	}
 	return true;
 }
 
 bool Parser::parseBoolFactor() {
-	if (_currToken->token->is(Token::Not)) {
-		++_currToken;
-		// TODO: do something with NOT
-		parseBoolFactor();
-	}
-	else if (_currToken->token->is(Token::LeftParen)) {
+//	if (_currToken->token->is(Token::Not)) {
+//		++_currToken;
+//		// TODO: do something with NOT
+//		parseBoolFactor();
+//	}
+	if (_currToken->token->is(Token::LeftParen)) {
 		parseToken(Token::LeftParen);
-		parseBoolTerm();
+		parseBoolRelation();
+		std::cout << "awaiting right paren" << std::endl;
+		std::cout << *_currToken->token << std::endl;
 		parseToken(Token::RightParen);
 	}
 	else {
@@ -196,6 +202,11 @@ bool Parser::parseBoolFactor() {
 }
 
 bool Parser::parseBoolRelation() {
+	std::shared_ptr<Lexer::LineToken> notToken;
+	if (_currToken->token->is(Token::Not)) {
+		notToken = std::make_shared<Lexer::LineToken>(*_currToken);
+		++_currToken;
+	}
 	parseExpression();
 	if (_currToken->token->is_one_of(
 		Token::LessThan,
@@ -205,24 +216,21 @@ bool Parser::parseBoolRelation() {
 		Token::GreaterOrEqualTo,
 		Token::GreaterThan)
 		) {
+		auto parsedToken = *_currToken;
+		std::cout << "Found relation" << std::endl;
 		++_currToken;
 		parseExpression();
+		this->postfixTokens.emplace_back(parsedToken);
+	}
+	if (notToken) {
+		this->postfixTokens.emplace_back(*notToken);
 	}
 	return true;
 }
 
 bool Parser::parseExpression() {
-	unsigned int signLine = 0;
-	// [Sign]
-	if (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
-		signLine = _currToken->line;
-		++_currToken;
-	}
 	// Term
 	parseTerm();
-	if (signLine > 0) {
-		this->postfixTokens.emplace_back(signLine, std::make_shared<Token>(Token::Type::Sign, "@"));
-	}
 	// { AddOp Term }
 	while (_currToken->token->is_one_of(Token::Add, Token::Sub)) {
 		auto parsedToken = _currToken;
@@ -256,6 +264,12 @@ bool Parser::parseFactor() {
 }
 
 bool Parser::parseFirstExpr() {
+	unsigned int signLine = 0;
+	// [Sign]
+	if (_currToken->token->is(Token::Sub)) {
+		signLine = _currToken->line;
+		++_currToken;
+	}
 	if (_currToken->token->is_one_of(Token::IntConst, Token::RealConst, Token::BoolConst)) {
 		this->postfixTokens.push_back(*_currToken);
 		++_currToken;
@@ -270,6 +284,9 @@ bool Parser::parseFirstExpr() {
 	}
 	else {
 		throw SyntaxError{ "Expected const, ident or Expression" };
+	}
+	if (signLine > 0) {
+		this->postfixTokens.emplace_back(signLine, std::make_shared<Token>(Token::Type::Sign, "@"));
 	}
 	return true;
 }
@@ -299,7 +316,7 @@ bool Parser::parseIdentDecl( const Lexer::LineToken& typeToken ) {
 	parseIdentifier();
 	parseToken(Token::Assign);
 	auto assignToken = std::prev(_currToken);
-	parseExpression();
+	parseBoolExpr();
 	this->postfixTokens.push_back(*assignToken);
 	return true;
 }

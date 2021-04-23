@@ -202,7 +202,8 @@ const std::map<
 };
 
 Lexer::LineToken::LineToken( unsigned int line, std::shared_ptr<Token> token ) : line(line), token(std::move(token)) {}
-Lexer::LineToken::LineToken(unsigned int line) : line(line) {}
+
+Lexer::LineToken::LineToken( unsigned int line ) : line(line) {}
 
 Lexer::Lexer() {}
 

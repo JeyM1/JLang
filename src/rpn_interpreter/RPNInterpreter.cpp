@@ -50,18 +50,26 @@ bool RPNInterpreter::postfixProcessing() {
 			}
 			else if (
 				token.token->is_one_of(
+					// Math
 					Token::Add, Token::Sub, Token::Multiply,
-					Token::Division, Token::IntDivision, Token::Power
+					Token::Division, Token::IntDivision, Token::Power,
+
+					// Boolean
+					Token::And, Token::Or,
+					Token::GreaterThan, Token::GreaterOrEqualTo,
+					Token::EqualTo, Token::NotEqual,
+					Token::LessThan, Token::LessOrEqualTo
 				)) {
 				processBinary();
 			}
-			else if (token.token->is(Token::Sign)) {
+			else if (token.token->is_one_of(Token::Sign, Token::Not)) {
 				processUnary();
 			}
 			else if (token.token->is(Token::Keyword)) {
 				// variable initialization
 				processInitialization();
 			}
+			// TODO: add bool operators.
 		}
 
 	}
@@ -170,7 +178,7 @@ void RPNInterpreter::processBinary() {
 			);
 		}
 		else {
-			throw RunTimeError{ "Invalid operands for Add operation" };
+			throw RunTimeError{ "Invalid operands for Add operator" };
 		}
 		break;
 	}
@@ -239,7 +247,7 @@ void RPNInterpreter::processBinary() {
 			);
 		}
 		else {
-			throw RunTimeError{ "Invalid operands for Subtract operation" };
+			throw RunTimeError{ "Invalid operands for Subtract operator" };
 		}
 		break;
 	}
@@ -308,7 +316,7 @@ void RPNInterpreter::processBinary() {
 			);
 		}
 		else {
-			throw RunTimeError{ "Invalid operands for Multiply operation" };
+			throw RunTimeError{ "Invalid operands for Multiply operator" };
 		}
 		break;
 	}
@@ -354,7 +362,7 @@ void RPNInterpreter::processBinary() {
 			);
 		}
 		else {
-			throw RunTimeError{ "Invalid operands for Division operation" };
+			throw RunTimeError{ "Invalid operands for Division operator" };
 		}
 		break;
 	}
@@ -404,7 +412,7 @@ void RPNInterpreter::processBinary() {
 			);
 		}
 		else {
-			throw RunTimeError{ "Invalid operands for IntDivision operation" };
+			throw RunTimeError{ "Invalid operands for IntDivision operator" };
 		}
 		break;
 	}
@@ -438,7 +446,173 @@ void RPNInterpreter::processBinary() {
 			);
 		}
 		else {
-			throw RunTimeError{ "Invalid operands for Power operation" };
+			throw RunTimeError{ "Invalid operands for Power operator" };
+		}
+		break;
+	}
+
+		/**
+		 * Boolean
+		 */
+	case Token::And: {
+		if (leftOp.token->variableType() == VariableType::BOOL
+		    && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				&& *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for And operator" };
+		}
+		break;
+	}
+	case Token::Or: {
+		if (leftOp.token->variableType() == VariableType::BOOL
+		    && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				|| *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for And operator" };
+		}
+		break;
+	}
+	case Token::GreaterThan: {
+		if (leftOp.token->variableType() == VariableType::INT
+		    && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				> *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				> *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				> *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				> *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for IntDivision operator" };
+		}
+		break;
+	}
+	case Token::GreaterOrEqualTo: {
+		if (leftOp.token->variableType() == VariableType::INT
+		    && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				>= *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				>= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				>= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				>= *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for IntDivision operator" };
+		}
+		break;
+	}
+	case Token::LessThan: {
+		if (leftOp.token->variableType() == VariableType::INT
+		    && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				< *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				< *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				< *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				< *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for IntDivision operator" };
+		}
+		break;
+	}
+	case Token::LessOrEqualTo: {
+		if (leftOp.token->variableType() == VariableType::INT
+		    && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				<= *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				<= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				<= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				<= *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for IntDivision operator" };
 		}
 		break;
 	}
@@ -462,22 +636,38 @@ void RPNInterpreter::processUnary() {
 	Lexer::LineToken operand = global_stack.top();
 	global_stack.pop();
 
+	std::shared_ptr<void> operandVal = operand.token->actual();
+
 	// TODO: plus sign
 
 	Lexer::LineToken resVal{ operand.line };
-	std::shared_ptr<void> operandVal = operand.token->actual();
-	switch (operand.token->variableType()) {
+	if (_currToken->token->is(Token::Sign)) {
+		switch (operand.token->variableType()) {
 
-	case INT:
-		resVal.token = std::make_shared<IntConstToken>(-*std::static_pointer_cast<IntConstToken::CTYPE>(operandVal));
-		break;
-	case REAL:
-		resVal.token = std::make_shared<RealConstToken>(-*std::static_pointer_cast<RealConstToken::CTYPE>(operandVal));
-		break;
-	case BOOL:
-		throw RunTimeError{ "Bad operand type for Sign operator!" };
-	case UNDEFINED:
-		throw RunTimeError{ "Undefined variable" };
+		case INT:
+			resVal.token = std::make_shared<IntConstToken>(-*std::static_pointer_cast<IntConstToken::CTYPE>(operandVal));
+			break;
+		case REAL:
+			resVal.token = std::make_shared<RealConstToken>(-*std::static_pointer_cast<RealConstToken::CTYPE>(operandVal));
+			break;
+		case BOOL:
+			throw RunTimeError{ "Bad operand type for Sign operator!" };
+		case UNDEFINED:
+			throw RunTimeError{ "Undefined variable" };
+		}
+	}
+	else if (_currToken->token->is(Token::Not)) {
+		switch (operand.token->variableType()) {
+			// TODO: binary change ie 00101 => 11010
+		case INT:
+		case REAL:
+			throw RunTimeError{ "Bad operand type for Not operator!" };
+		case BOOL:
+			resVal.token = std::make_shared<BoolConstToken>(!*std::static_pointer_cast<BoolConstToken::CTYPE>(operandVal));
+			break;
+		case UNDEFINED:
+			throw RunTimeError{ "Undefined variable" };
+		}
 	}
 
 	global_stack.push(resVal);
