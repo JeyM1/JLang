@@ -4,11 +4,13 @@
 
 #include <iomanip>
 #include <cmath>
+#include <utility>
 #include "RPNInterpreter.h"
 #include "exceptions/RunTimeError.h"
 #include "../lexer/IntConstToken.h"
 #include "../lexer/BoolConstToken.h"
 #include "../lexer/RealConstToken.h"
+#include "../lexer/JFToken.h"
 
 
 const std::map<std::string, VariableType> RPNInterpreter::variableTypes = {
@@ -17,11 +19,8 @@ const std::map<std::string, VariableType> RPNInterpreter::variableTypes = {
 	{ "bool", VariableType::BOOL }
 };
 
-bool RPNInterpreter::interpret( const std::vector<Lexer::LineToken>& tokens,
-                                const std::vector<std::shared_ptr<IdentifierToken>>& identifiers ) {
-	this->_tokens = tokens;
+bool RPNInterpreter::interpret() {
 	this->_currToken = this->_tokens.begin();
-	this->_identifiers = identifiers;
 	this->global_stack = std::stack<Lexer::LineToken>{};
 	try {
 		return postfixProcessing();
@@ -66,10 +65,23 @@ bool RPNInterpreter::postfixProcessing() {
 				processUnary();
 			}
 			else if (token.token->is(Token::Keyword)) {
-				// variable initialization
-				processInitialization();
+				if (token.token->lexeme() == "print") {
+					processPrint();
+				}
+				else if (token.token->lexeme() == "read") {
+
+				}
+				else if (token.token->lexeme() == "JF") {
+					processJF();
+				}
+				else if (token.token->lexeme() == "JUMP") {
+					std::cout << "jump" << std::endl;
+				}
+				else {
+					// variable initialization
+					processInitialization();
+				}
 			}
-			// TODO: add bool operators.
 		}
 
 	}
@@ -672,3 +684,57 @@ void RPNInterpreter::processUnary() {
 
 	global_stack.push(resVal);
 }
+
+void RPNInterpreter::processPrint() {
+	while (!global_stack.empty()) {
+		Lexer::LineToken operand = global_stack.top();
+		global_stack.pop();
+
+		std::shared_ptr<void> operandVal = operand.token->actual();
+
+		switch (operand.token->variableType()) {
+		case INT:
+			std::cout << *std::static_pointer_cast<IntConstToken::CTYPE>(operandVal);
+			break;
+		case REAL:
+			std::cout << *std::static_pointer_cast<RealConstToken::CTYPE>(operandVal);
+			break;
+		case BOOL:
+			std::cout << *std::static_pointer_cast<BoolConstToken::CTYPE>(operandVal);
+			break;
+		case UNDEFINED:
+			std::cout << "undefined";
+			break;
+		}
+		if (!global_stack.empty())
+			std::cout << ", ";
+	}
+	std::cout << std::endl;
+}
+
+void RPNInterpreter::processJF() {
+	Lexer::LineToken determinant = global_stack.top();
+	global_stack.pop();
+	if (!*parseBoolFromVar(determinant.token)) {
+		// perform jump
+		_currToken = std::dynamic_pointer_cast<JFToken>(_currToken->token)->jumpToken;
+		std::cout << "jumped to: " << _currToken->token->lexeme() << std::endl;
+	}
+}
+
+std::shared_ptr<bool> RPNInterpreter::parseBoolFromVar( std::shared_ptr<Token> token ) {
+	switch (token->variableType()) {
+	case INT:
+		return std::make_shared<BoolConstToken::CTYPE>(*std::static_pointer_cast<IntConstToken::CTYPE>(token->actual()));
+	case REAL:
+		return std::make_shared<BoolConstToken::CTYPE>(*std::static_pointer_cast<RealConstToken::CTYPE>(token->actual()));
+	case BOOL:
+		return std::static_pointer_cast<BoolConstToken::CTYPE>(token->actual());
+	case UNDEFINED:
+		throw RunTimeError{ "Variable is undefined" };
+	}
+	throw RunTimeError{ "unknown variable" };
+}
+
+RPNInterpreter::RPNInterpreter( const std::vector<Lexer::LineToken>& tokens, std::vector<std::shared_ptr<
+	IdentifierToken>> identifiers ) : _tokens(tokens), _identifiers(std::move(identifiers)) {}

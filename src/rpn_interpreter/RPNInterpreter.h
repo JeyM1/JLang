@@ -20,13 +20,14 @@ class RPNInterpreter
 	static const std::map<std::string, VariableType> variableTypes;
   protected:
 	CurrentToken _currToken{};
-	std::vector<Lexer::LineToken> _tokens{};
+	const std::vector<Lexer::LineToken>& _tokens;
 	std::vector<std::shared_ptr<IdentifierToken>> _identifiers;
 	std::stack<Lexer::LineToken> global_stack{};
 
   public:
-	bool interpret( const std::vector<Lexer::LineToken>& tokens,
-	                const std::vector<std::shared_ptr<IdentifierToken>>& identifiers );
+	RPNInterpreter( const std::vector<Lexer::LineToken>& tokens, std::vector<std::shared_ptr<IdentifierToken>>  identifiers );
+
+	bool interpret();
 	bool postfixProcessing();
 	void processAssign();
 	void processBinary();
@@ -34,6 +35,9 @@ class RPNInterpreter
 
 	const std::vector<std::shared_ptr<IdentifierToken>>& getIdentifiers() const;
 	void processUnary();
+	void processPrint();
+	void processJF();
+	static std::shared_ptr<bool> parseBoolFromVar( std::shared_ptr<Token> token );
 };
 
 #endif //_RPNINTERPRETER_H_

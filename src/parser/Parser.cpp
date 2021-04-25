@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include "../logger.h"
+#include "../lexer/JFToken.h"
 
 
 Parser::Parser() {}
@@ -182,11 +183,12 @@ bool Parser::parseBoolTerm() {
 }
 
 bool Parser::parseBoolFactor() {
-//	if (_currToken->token->is(Token::Not)) {
-//		++_currToken;
-//		// TODO: do something with NOT
-//		parseBoolFactor();
-//	}
+	std::shared_ptr<Lexer::LineToken> notToken;
+	if (_currToken->token->is(Token::Not)) {
+		notToken = std::make_shared<Lexer::LineToken>(*_currToken);
+		++_currToken;
+		parseBoolFactor();
+	}
 	if (_currToken->token->is(Token::LeftParen)) {
 		parseToken(Token::LeftParen);
 		parseBoolRelation();
@@ -194,19 +196,23 @@ bool Parser::parseBoolFactor() {
 		std::cout << *_currToken->token << std::endl;
 		parseToken(Token::RightParen);
 	}
-	else {
+	else if (_currToken->token->is_one_of(
+		Token::Identifier, Token::IntConst, Token::RealConst, Token::BoolConst
+	)) {
 		parseBoolRelation();
 	}
-
+	if (notToken) {
+		this->postfixTokens.emplace_back(*notToken);
+	}
 	return true;
 }
 
 bool Parser::parseBoolRelation() {
-	std::shared_ptr<Lexer::LineToken> notToken;
-	if (_currToken->token->is(Token::Not)) {
-		notToken = std::make_shared<Lexer::LineToken>(*_currToken);
-		++_currToken;
-	}
+//	std::shared_ptr<Lexer::LineToken> notToken;
+//	if (_currToken->token->is(Token::Not)) {
+//		notToken = std::make_shared<Lexer::LineToken>(*_currToken);
+//		++_currToken;
+//	}
 	parseExpression();
 	if (_currToken->token->is_one_of(
 		Token::LessThan,
@@ -222,9 +228,9 @@ bool Parser::parseBoolRelation() {
 		parseExpression();
 		this->postfixTokens.emplace_back(parsedToken);
 	}
-	if (notToken) {
-		this->postfixTokens.emplace_back(*notToken);
-	}
+//	if (notToken) {
+//		this->postfixTokens.emplace_back(*notToken);
+//	}
 	return true;
 }
 
@@ -331,17 +337,19 @@ bool Parser::parseInp() {
 
 bool Parser::parseOut() {
 	parseKeyword("print");
+	Lexer::LineToken printToken = *prev(_currToken);
 	parseToken(Token::LeftParen);
 	parseIdentList();
 	parseToken(Token::RightParen);
+	this->postfixTokens.emplace_back(printToken);
 	return true;
 }
 
 bool Parser::parseIdentList() {
-	parseIdentifier();
+	parseBoolExpr();
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
-		parseIdentifier();
+		parseBoolExpr();
 	}
 	return true;
 }
@@ -367,7 +375,12 @@ bool Parser::parseIfStatement() {
 	parseBoolExpr();
 	parseToken(Token::RightParen);
 	parseKeyword("then");
+	unsigned int jfLine = std::prev(_currToken)->line;
+	std::shared_ptr<JFToken> jfToken = std::make_shared<JFToken>();
+	this->postfixTokens.emplace_back(jfLine, jfToken);
 	parseDoBlock();
+	jfToken->jumpToken = std::prev(this->postfixTokens.end());
+	// TODO: Jump to else end
 	if (_currToken->token->is(Token::Keyword) && _currToken->token->lexeme() == "else") {
 		parseKeyword("else");
 		parseDoBlock();

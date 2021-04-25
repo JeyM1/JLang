@@ -32,8 +32,8 @@ int main() {
 	}
 	std::cout << std::endl;
 
-	RPNInterpreter interpreter{};
-	if (interpreter.interpret(rpn_tokens, parser.getIdentifiers())) {
+	RPNInterpreter interpreter{parser.getParsedTokens(), parser.getIdentifiers()};
+	if (interpreter.interpret()) {
 		std::cout << "Interpreter success status: 1" << std::endl;
 	}
 	else {
@@ -41,11 +41,11 @@ int main() {
 		exit(1);
 	}
 
-	std::cout << "Identifiers table: " << std::endl;
-	const auto& identifiers = interpreter.getIdentifiers();
-	for(const auto& identifier : identifiers) {
-		std::cout << *identifier << std::endl;
-	}
+//	std::cout << "Identifiers table: " << std::endl;
+//	const auto& identifiers = interpreter.getIdentifiers();
+//	for(const auto& identifier : identifiers) {
+//		std::cout << *identifier << std::endl;
+//	}
 
 	return 0;
 }
