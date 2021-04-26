@@ -195,7 +195,6 @@ bool Parser::parseBoolFactor() {
 	if (_currToken->token->is(Token::LeftParen)) {
 		parseToken(Token::LeftParen);
 		parseBoolRelation();
-		std::cout << "awaiting right paren" << std::endl;
 		std::cout << *_currToken->token << std::endl;
 		parseToken(Token::RightParen);
 	}
@@ -211,11 +210,6 @@ bool Parser::parseBoolFactor() {
 }
 
 bool Parser::parseBoolRelation() {
-//	std::shared_ptr<Lexer::LineToken> notToken;
-//	if (_currToken->token->is(Token::Not)) {
-//		notToken = std::make_shared<Lexer::LineToken>(*_currToken);
-//		++_currToken;
-//	}
 	parseExpression();
 	if (_currToken->token->is_one_of(
 		Token::LessThan,
@@ -226,14 +220,10 @@ bool Parser::parseBoolRelation() {
 		Token::GreaterThan)
 		) {
 		auto parsedToken = *_currToken;
-		std::cout << "Found relation" << std::endl;
 		++_currToken;
 		parseExpression();
 		this->postfixTokens.emplace_back(parsedToken);
 	}
-//	if (notToken) {
-//		this->postfixTokens.emplace_back(*notToken);
-//	}
 	return true;
 }
 
