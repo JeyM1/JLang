@@ -690,28 +690,23 @@ void RPNInterpreter::processUnary() {
 }
 
 void RPNInterpreter::processPrint() {
-	while (!global_stack.empty()) {
-		Lexer::LineToken operand = global_stack.top();
-		global_stack.pop();
+	Lexer::LineToken operand = *(++_currToken);
 
-		std::shared_ptr<void> operandVal = operand.token->actual();
+	std::shared_ptr<void> operandVal = operand.token->actual();
 
-		switch (operand.token->variableType()) {
-		case INT:
-			std::cout << *std::static_pointer_cast<IntConstToken::CTYPE>(operandVal);
-			break;
-		case REAL:
-			std::cout << *std::static_pointer_cast<RealConstToken::CTYPE>(operandVal);
-			break;
-		case BOOL:
-			std::cout << *std::static_pointer_cast<BoolConstToken::CTYPE>(operandVal);
-			break;
-		case UNDEFINED:
-			std::cout << "undefined";
-			break;
-		}
-		if (!global_stack.empty())
-			std::cout << ", ";
+	switch (operand.token->variableType()) {
+	case INT:
+		std::cout << *std::static_pointer_cast<IntConstToken::CTYPE>(operandVal);
+		break;
+	case REAL:
+		std::cout << *std::static_pointer_cast<RealConstToken::CTYPE>(operandVal);
+		break;
+	case BOOL:
+		std::cout << *std::static_pointer_cast<BoolConstToken::CTYPE>(operandVal);
+		break;
+	case UNDEFINED:
+		std::cout << "undefined";
+		break;
 	}
 	std::cout << std::endl;
 }

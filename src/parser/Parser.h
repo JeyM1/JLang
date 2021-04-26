@@ -49,7 +49,7 @@ class Parser
 	bool parseIdentDecl( const Lexer::LineToken& );
 	bool parseInp();
 	bool parseOut();
-	bool parseIdentList();
+	bool parseIdentList( const Lexer::LineToken& insertToken );
 	bool parseTerm();
 	bool parseFactor();
 	bool parseFirstExpr();

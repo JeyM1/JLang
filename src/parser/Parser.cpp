@@ -116,6 +116,7 @@ bool Parser::parseStatement() {
 	switch (_currToken->token->type()) {
 	case Token::Identifier: {
 		parseAssign();
+		parseToken(Token::Semicolon);
 		break;
 	}
 	case Token::Keyword: {
@@ -159,7 +160,6 @@ bool Parser::parseAssign() {
 	auto assignToken = std::prev(_currToken);
 	parseBoolExpr();
 	this->postfixTokens.push_back(*assignToken);
-	parseToken(Token::Semicolon);
 	return true;
 }
 
@@ -332,8 +332,9 @@ bool Parser::parseIdentDecl( const Lexer::LineToken& typeToken ) {
 
 bool Parser::parseInp() {
 	parseKeyword("read");
+	Lexer::LineToken readToken = *prev(_currToken);
 	parseToken(Token::LeftParen);
-	parseIdentList();
+	parseIdentList(readToken);
 	parseToken(Token::RightParen);
 	return true;
 }
@@ -342,16 +343,17 @@ bool Parser::parseOut() {
 	parseKeyword("print");
 	Lexer::LineToken printToken = *prev(_currToken);
 	parseToken(Token::LeftParen);
-	parseIdentList();
+	parseIdentList(printToken);
 	parseToken(Token::RightParen);
-	this->postfixTokens.emplace_back(printToken);
 	return true;
 }
 
-bool Parser::parseIdentList() {
+bool Parser::parseIdentList( const Lexer::LineToken& insertToken ) {
+	this->postfixTokens.emplace_back(insertToken);
 	parseBoolExpr();
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
+		this->postfixTokens.emplace_back(insertToken);
 		parseBoolExpr();
 	}
 	return true;
@@ -403,14 +405,41 @@ bool Parser::parseIfStatement() {
 bool Parser::parseForStatement() {
 	parseKeyword("for");
 	parseToken(Token::LeftParen);
+
+	Lexer::LineToken forIdentifier = *_currToken;
+
 	// IndExpr
-	parseInitialization();
+	parseAssign();
+
+	// jump to "while" after assign
+	std::shared_ptr<JUMPToken> jumpToWhileOnInit = std::make_shared<JUMPToken>();
+	this->postfixTokens.emplace_back(std::prev(this->postfixTokens.end())->line, jumpToWhileOnInit);
+
 	parseKeyword("by");
+	// push initialized variable to postfix to make <var> = ArithmExpr2
+
+	std::shared_ptr<JUMPToken> jumpToByOnBodyEnd = std::make_shared<JUMPToken>();
+	jumpToByOnBodyEnd->jumpToIdx = this->postfixTokens.size() - 1;
+
+	this->postfixTokens.push_back(forIdentifier);
 	parseExpression();
+	this->postfixTokens.emplace_back(forIdentifier.line, std::make_shared<Token>(Token::Assign, "="));
+
 	parseKeyword("while");
+	jumpToWhileOnInit->jumpToIdx = this->postfixTokens.size() - 1;
+
 	parseBoolExpr();
+
+	// JF to the "for" end while BoolExpr is not working anymore
+	std::shared_ptr<JFToken> jumpOut = std::make_shared<JFToken>();
+	this->postfixTokens.emplace_back(std::prev(this->postfixTokens.end())->line, jumpOut);
+
 	parseToken(Token::RightParen);
 	parseKeyword("do");
+
 	parseDoBlock();
+	this->postfixTokens.emplace_back(std::prev(this->postfixTokens.end())->line, jumpToByOnBodyEnd);
+
+	jumpOut->jumpToIdx = this->postfixTokens.size() - 1;
 	return true;
 }

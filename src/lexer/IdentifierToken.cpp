@@ -45,7 +45,7 @@ void IdentifierToken::setActual( std::shared_ptr<void> value, VariableType from 
 				BoolConstToken::CTYPE>(value));
 			break;
 		case UNDEFINED:
-			throw RunTimeError{ "Impossible error." };
+			throw RunTimeError{ "Variable is undefined, cannot setActual!" };
 		}
 		break;
 	case REAL:
@@ -62,7 +62,7 @@ void IdentifierToken::setActual( std::shared_ptr<void> value, VariableType from 
 				BoolConstToken::CTYPE>(value));
 			break;
 		case UNDEFINED:
-			throw RunTimeError{ "Impossible error." };
+			throw RunTimeError{ "Variable is undefined, cannot setActual!" };
 		}
 		break;
 	case BOOL:
@@ -79,11 +79,11 @@ void IdentifierToken::setActual( std::shared_ptr<void> value, VariableType from 
 			this->_actual = value;
 			break;
 		case UNDEFINED:
-			throw RunTimeError{ "Impossible error." };
+			throw RunTimeError{ "Variable is undefined, cannot setActual!" };
 		}
 		break;
 	case UNDEFINED:
-		throw RunTimeError{ "Impossible error." };
+		throw RunTimeError{ "Variable is undefined, cannot setActual!" };
 	}
 }
 
