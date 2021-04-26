@@ -38,6 +38,7 @@ class RPNInterpreter
 	void processPrint();
 	void processJF();
 	static std::shared_ptr<bool> parseBoolFromVar( std::shared_ptr<Token> token );
+	void processJUMP();
 };
 
 #endif //_RPNINTERPRETER_H_

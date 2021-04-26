@@ -4,8 +4,6 @@
 
 #include "JUMPToken.h"
 
-#include <utility>
 
-
-JUMPToken::JUMPToken( std::shared_ptr<Token> jumpToken )
+JUMPToken::JUMPToken()
 	: Token(Token::Keyword, "JUMP") {}

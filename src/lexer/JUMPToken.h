@@ -6,14 +6,13 @@
 #define _JUMPTOKEN_H_
 
 #include "Token.h"
-#include "../rpn_interpreter/RPNInterpreter.h"
 
 
 class JUMPToken : public Token
 {
   public:
 	JUMPToken();
-	CurrentToken jumpToken;
+	unsigned int jumpToIdx;
 };
 
 #endif //_JUMPTOKEN_H_

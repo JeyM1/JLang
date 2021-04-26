@@ -11,6 +11,7 @@
 #include "../lexer/BoolConstToken.h"
 #include "../lexer/RealConstToken.h"
 #include "../lexer/JFToken.h"
+#include "../lexer/JUMPToken.h"
 
 
 const std::map<std::string, VariableType> RPNInterpreter::variableTypes = {
@@ -18,6 +19,9 @@ const std::map<std::string, VariableType> RPNInterpreter::variableTypes = {
 	{ "real", VariableType::REAL },
 	{ "bool", VariableType::BOOL }
 };
+
+RPNInterpreter::RPNInterpreter( const std::vector<Lexer::LineToken>& tokens, std::vector<std::shared_ptr<
+	IdentifierToken>> identifiers ) : _tokens(tokens), _identifiers(std::move(identifiers)) {}
 
 bool RPNInterpreter::interpret() {
 	this->_currToken = this->_tokens.begin();
@@ -75,7 +79,7 @@ bool RPNInterpreter::postfixProcessing() {
 					processJF();
 				}
 				else if (token.token->lexeme() == "JUMP") {
-					std::cout << "jump" << std::endl;
+					processJUMP();
 				}
 				else {
 					// variable initialization
@@ -712,16 +716,6 @@ void RPNInterpreter::processPrint() {
 	std::cout << std::endl;
 }
 
-void RPNInterpreter::processJF() {
-	Lexer::LineToken determinant = global_stack.top();
-	global_stack.pop();
-	if (!*parseBoolFromVar(determinant.token)) {
-		// perform jump
-		_currToken = std::dynamic_pointer_cast<JFToken>(_currToken->token)->jumpToken;
-		std::cout << "jumped to: " << _currToken->token->lexeme() << std::endl;
-	}
-}
-
 std::shared_ptr<bool> RPNInterpreter::parseBoolFromVar( std::shared_ptr<Token> token ) {
 	switch (token->variableType()) {
 	case INT:
@@ -736,5 +730,17 @@ std::shared_ptr<bool> RPNInterpreter::parseBoolFromVar( std::shared_ptr<Token> t
 	throw RunTimeError{ "unknown variable" };
 }
 
-RPNInterpreter::RPNInterpreter( const std::vector<Lexer::LineToken>& tokens, std::vector<std::shared_ptr<
-	IdentifierToken>> identifiers ) : _tokens(tokens), _identifiers(std::move(identifiers)) {}
+void RPNInterpreter::processJF() {
+	Lexer::LineToken determinant = global_stack.top();
+	global_stack.pop();
+	if (!*parseBoolFromVar(determinant.token)) {
+		unsigned int idx = std::dynamic_pointer_cast<JFToken>(_currToken->token)->jumpToIdx;
+		// perform jump
+		_currToken = this->_tokens.begin() + idx;
+	}
+}
+
+void RPNInterpreter::processJUMP() {
+	unsigned int idx = std::dynamic_pointer_cast<JUMPToken>(_currToken->token)->jumpToIdx;
+	_currToken = this->_tokens.begin() + idx;
+}

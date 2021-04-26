@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "../logger.h"
 #include "../lexer/JFToken.h"
+#include "../lexer/JUMPToken.h"
 
 
 Parser::Parser() {}
@@ -145,6 +146,8 @@ bool Parser::parseStatement() {
 		// end of program
 		return false;
 	}
+	default:
+		throw SyntaxError{ "Unknown token in Statement" };
 	}
 	return true;
 }
@@ -375,15 +378,24 @@ bool Parser::parseIfStatement() {
 	parseBoolExpr();
 	parseToken(Token::RightParen);
 	parseKeyword("then");
+
+	// JF to else (will jump if BoolExpr is false).
 	unsigned int jfLine = std::prev(_currToken)->line;
 	std::shared_ptr<JFToken> jfToken = std::make_shared<JFToken>();
 	this->postfixTokens.emplace_back(jfLine, jfToken);
 	parseDoBlock();
-	jfToken->jumpToken = std::prev(this->postfixTokens.end());
-	// TODO: Jump to else end
+	jfToken->jumpToIdx = this->postfixTokens.size() - 1;
+
 	if (_currToken->token->is(Token::Keyword) && _currToken->token->lexeme() == "else") {
 		parseKeyword("else");
+
+		std::shared_ptr<JUMPToken> jumpToken = std::make_shared<JUMPToken>();
+		// JUMP to else end
+		this->postfixTokens.emplace_back(jfLine, jumpToken);
+		jfToken->jumpToIdx = this->postfixTokens.size() - 1;
+
 		parseDoBlock();
+		jumpToken->jumpToIdx = this->postfixTokens.size() - 1;
 	}
 	return true;
 }

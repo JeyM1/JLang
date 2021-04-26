@@ -6,14 +6,13 @@
 #define _JFTOKEN_H_
 
 #include "Token.h"
-#include "../rpn_interpreter/RPNInterpreter.h"
 
 
 class JFToken : public Token
 {
   public:
 	JFToken();
-	CurrentToken jumpToken;
+	unsigned int jumpToIdx;
 };
 
 #endif //_JFTOKEN_H_
