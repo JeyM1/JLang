@@ -20,8 +20,15 @@ const std::map<std::string, VariableType> RPNInterpreter::variableTypes = {
 	{ "bool", VariableType::BOOL }
 };
 
-RPNInterpreter::RPNInterpreter( const std::vector<Lexer::LineToken>& tokens, std::vector<std::shared_ptr<
-	IdentifierToken>> identifiers ) : _tokens(tokens), _identifiers(std::move(identifiers)) {}
+RPNInterpreter::RPNInterpreter( const std::vector<Lexer::LineToken>& tokens,
+                                std::vector<std::shared_ptr<
+	                                IdentifierToken>> identifiers,
+                                std::ostream& interpreter_out,
+                                std::istream& interpreter_in )
+	: _tokens(tokens),
+	  _identifiers(std::move(identifiers)),
+	  _interpreter_out(interpreter_out),
+	  _interpreter_in(interpreter_in) {}
 
 bool RPNInterpreter::interpret() {
 	this->_currToken = this->_tokens.begin();
@@ -73,7 +80,7 @@ bool RPNInterpreter::postfixProcessing() {
 					processPrint();
 				}
 				else if (token.token->lexeme() == "read") {
-
+					processRead();
 				}
 				else if (token.token->lexeme() == "JF") {
 					processJF();
@@ -696,19 +703,53 @@ void RPNInterpreter::processPrint() {
 
 	switch (operand.token->variableType()) {
 	case INT:
-		std::cout << *std::static_pointer_cast<IntConstToken::CTYPE>(operandVal);
+		this->_interpreter_out << *std::static_pointer_cast<IntConstToken::CTYPE>(operandVal);
 		break;
 	case REAL:
-		std::cout << *std::static_pointer_cast<RealConstToken::CTYPE>(operandVal);
+		this->_interpreter_out << *std::static_pointer_cast<RealConstToken::CTYPE>(operandVal);
 		break;
 	case BOOL:
-		std::cout << *std::static_pointer_cast<BoolConstToken::CTYPE>(operandVal);
+		this->_interpreter_out << *std::static_pointer_cast<BoolConstToken::CTYPE>(operandVal);
 		break;
 	case UNDEFINED:
-		std::cout << "undefined";
+		this->_interpreter_out << "undefined";
 		break;
 	}
-	std::cout << std::endl;
+	this->_interpreter_out << std::endl;
+}
+
+void RPNInterpreter::processRead() {
+	Lexer::LineToken operand = *(++_currToken);
+
+	if (operand.token->is_not(Token::Identifier)) {
+		throw RunTimeError{ "Can read only into variable!" };
+	}
+
+	std::shared_ptr<IdentifierToken> variable = std::dynamic_pointer_cast<IdentifierToken>(operand.token);
+
+	std::string input;
+	this->_interpreter_in >> input;
+
+	switch (variable->variableType()) {
+	case INT: {
+		IntConstToken constructed{ input };
+		variable->setActual(constructed.actual(), INT);
+		break;
+	}
+	case REAL: {
+		RealConstToken constructed{ input };
+		variable->setActual(constructed.actual(), REAL);
+		break;
+	}
+	case BOOL: {
+		BoolConstToken constructed{ input };
+		variable->setActual(constructed.actual(), BOOL);
+		break;
+	}
+	case UNDEFINED:
+		throw RunTimeError{ "Cannot read into undefined variable!" };
+	}
+	this->_interpreter_out << std::endl;
 }
 
 std::shared_ptr<bool> RPNInterpreter::parseBoolFromVar( std::shared_ptr<Token> token ) {
@@ -739,3 +780,4 @@ void RPNInterpreter::processJUMP() {
 	unsigned int idx = std::dynamic_pointer_cast<JUMPToken>(_currToken->token)->jumpToIdx;
 	_currToken = this->_tokens.begin() + idx;
 }
+

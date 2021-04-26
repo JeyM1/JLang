@@ -24,8 +24,15 @@ class RPNInterpreter
 	std::vector<std::shared_ptr<IdentifierToken>> _identifiers;
 	std::stack<Lexer::LineToken> global_stack{};
 
+	std::ostream& _interpreter_out;
+	std::istream& _interpreter_in;
+
   public:
-	RPNInterpreter( const std::vector<Lexer::LineToken>& tokens, std::vector<std::shared_ptr<IdentifierToken>>  identifiers );
+	RPNInterpreter( const std::vector<Lexer::LineToken>& tokens,
+	                std::vector<std::shared_ptr<IdentifierToken>> identifiers,
+	                std::ostream& interpreter_out = std::cout,
+	                std::istream& interpreter_in = std::cin
+	);
 
 	bool interpret();
 	bool postfixProcessing();
@@ -39,6 +46,7 @@ class RPNInterpreter
 	void processJF();
 	static std::shared_ptr<bool> parseBoolFromVar( std::shared_ptr<Token> token );
 	void processJUMP();
+	void processRead();
 };
 
 #endif //_RPNINTERPRETER_H_
