@@ -44,6 +44,14 @@ bool RPNInterpreter::interpret() {
 		}
 		return false;
 	}
+	catch (const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+		if (_currToken != _tokens.end()) {
+			std::cerr << "\t\t at " << std::setw(3) << _currToken->line
+			          << " | \"" << std::prev(_currToken)->token->lexeme() << "\"" << std::endl;
+		}
+		return false;
+	}
 }
 
 bool RPNInterpreter::postfixProcessing() {
@@ -697,7 +705,8 @@ void RPNInterpreter::processUnary() {
 }
 
 void RPNInterpreter::processPrint() {
-	Lexer::LineToken operand = *(++_currToken);
+	Lexer::LineToken operand = global_stack.top();
+	global_stack.pop();
 
 	std::shared_ptr<void> operandVal = operand.token->actual();
 
@@ -719,7 +728,8 @@ void RPNInterpreter::processPrint() {
 }
 
 void RPNInterpreter::processRead() {
-	Lexer::LineToken operand = *(++_currToken);
+	Lexer::LineToken operand = global_stack.top();
+	global_stack.pop();
 
 	if (operand.token->is_not(Token::Identifier)) {
 		throw RunTimeError{ "Can read only into variable!" };
@@ -749,7 +759,6 @@ void RPNInterpreter::processRead() {
 	case UNDEFINED:
 		throw RunTimeError{ "Cannot read into undefined variable!" };
 	}
-	this->_interpreter_out << std::endl;
 }
 
 std::shared_ptr<bool> RPNInterpreter::parseBoolFromVar( std::shared_ptr<Token> token ) {

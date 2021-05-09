@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "BoolConstToken.h"
+#include "exceptions/LexerError.h"
 
 
 BoolConstToken::BoolConstToken( const std::string& lexeme )
@@ -15,7 +16,8 @@ BoolConstToken::BoolConstToken( const std::string& lexeme )
 		_actual = std::make_shared<CTYPE>(false);
 	}
 	else {
-		std::cerr << "Unexpected BoolConstToken, got \"" << lexeme << "\"." << std::endl;
+		this->_type = Unexpected;
+		throw LexerError{ "Unexpected BoolConstToken" };
 	}
 }
 

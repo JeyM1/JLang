@@ -34,4 +34,4 @@ add_executable(
         src/rpn_interpreter/RPNInterpreter.h
         src/rpn_interpreter/exceptions/RunTimeError.cpp
         src/rpn_interpreter/exceptions/RunTimeError.h
-        src/rpn_interpreter/VariableType.h src/lexer/JUMPToken.cpp src/lexer/JUMPToken.h src/lexer/JFToken.cpp src/lexer/JFToken.h)
+        src/rpn_interpreter/VariableType.h src/lexer/JUMPToken.cpp src/lexer/JUMPToken.h src/lexer/JFToken.cpp src/lexer/JFToken.h src/lexer/exceptions/LexerError.cpp src/lexer/exceptions/LexerError.h)

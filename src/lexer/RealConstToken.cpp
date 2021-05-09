@@ -3,6 +3,7 @@
 //
 
 #include "RealConstToken.h"
+#include "exceptions/LexerError.h"
 
 
 RealConstToken::RealConstToken( const std::string& lexeme ) : Token(Type::RealConst, lexeme) {
@@ -10,9 +11,8 @@ RealConstToken::RealConstToken( const std::string& lexeme ) : Token(Type::RealCo
 		this->_actual = std::make_shared<CTYPE>(std::stold(lexeme));
 	}
 	catch (...) {
-		// TODO: generate error
 		this->_type = Unexpected;
-		std::cerr << "Unexpected RealConst" << std::endl;
+		throw LexerError{ "Unexpected RealConst" };
 	}
 }
 

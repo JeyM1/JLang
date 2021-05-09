@@ -199,7 +199,8 @@ bool Parser::parseBoolFactor() {
 		parseToken(Token::RightParen);
 	}
 	else if (_currToken->token->is_one_of(
-		Token::Identifier, Token::IntConst, Token::RealConst, Token::BoolConst
+		Token::Identifier, Token::IntConst, Token::RealConst, Token::BoolConst,
+		Token::Sub
 	)) {
 		parseBoolRelation();
 	}
@@ -339,12 +340,12 @@ bool Parser::parseOut() {
 }
 
 bool Parser::parseIdentList( const Lexer::LineToken& insertToken ) {
-	this->postfixTokens.emplace_back(insertToken);
 	parseBoolExpr();
+	this->postfixTokens.emplace_back(insertToken);
 	while (_currToken->token->is(Token::Comma)) {
 		++_currToken;
-		this->postfixTokens.emplace_back(insertToken);
 		parseBoolExpr();
+		this->postfixTokens.emplace_back(insertToken);
 	}
 	return true;
 }

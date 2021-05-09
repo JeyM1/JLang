@@ -3,6 +3,7 @@
 //
 
 #include "IntConstToken.h"
+#include "exceptions/LexerError.h"
 
 
 IntConstToken::IntConstToken( const std::string& lexeme )
@@ -11,9 +12,8 @@ IntConstToken::IntConstToken( const std::string& lexeme )
 		this->_actual = std::make_shared<CTYPE>(std::stoi(lexeme));
 	}
 	catch (...) {
-		// TODO: generate error
 		this->_type = Unexpected;
-		std::cerr << "Unexpected IntConst" << std::endl;
+		throw LexerError{ "Unexpected IntConst" };
 	}
 
 }
