@@ -511,6 +511,144 @@ void RPNInterpreter::processBinary() {
 		}
 		break;
 	}
+	case Token::NotEqual: {
+		if (leftOp.token->variableType() == VariableType::INT
+		    && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<IntConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<RealConstToken>(
+				(RealConstToken::CTYPE)*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<IntConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<RealConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<RealConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				!= (RealConstToken::CTYPE)*std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<RealConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::BOOL
+		         && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::BOOL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::BOOL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				!= *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for NotEqual operator" };
+		}
+		break;
+	}
+	case Token::EqualTo: {
+		if (leftOp.token->variableType() == VariableType::INT
+		    && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<IntConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<RealConstToken>(
+				(RealConstToken::CTYPE)*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::INT
+		         && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<IntConstToken>(
+				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<RealConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<RealConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				== (RealConstToken::CTYPE)*std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::REAL
+		         && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<RealConstToken>(
+				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::BOOL
+		         && rightOp.token->variableType() == VariableType::BOOL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<BoolConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::BOOL
+		         && rightOp.token->variableType() == VariableType::INT) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<IntConstToken::CTYPE>(rightVal)
+			);
+		}
+		else if (leftOp.token->variableType() == VariableType::BOOL
+		         && rightOp.token->variableType() == VariableType::REAL) {
+			resVal.token = std::make_shared<BoolConstToken>(
+				*std::static_pointer_cast<BoolConstToken::CTYPE>(leftVal)
+				== *std::static_pointer_cast<RealConstToken::CTYPE>(rightVal)
+			);
+		}
+		else {
+			throw RunTimeError{ "Invalid operands for EqualTo operator" };
+		}
+		break;
+	}
 	case Token::GreaterThan: {
 		if (leftOp.token->variableType() == VariableType::INT
 		    && rightOp.token->variableType() == VariableType::INT) {
