@@ -227,6 +227,7 @@ bool Lexer::lex( std::istream& inpStream ) noexcept {
 			catch (...) {
 				std::cerr << "No state to go from " << this->currState << std::endl;
 				this->isLastLexSuccess = false;
+				return false;
 			}
 		}
 		bool isStateFinal = finalStateProcessingFunctions.count(this->currState) > 0;

@@ -401,8 +401,15 @@ bool Parser::parseForStatement() {
 
 	Lexer::LineToken forIdentifier = *_currToken;
 
-	// IndExpr
-	parseAssign();
+	// [Type] - initialization
+	if (_currToken->token->is(Token::Keyword)) {
+		forIdentifier = *std::next(_currToken);
+		parseInitialization();
+	}
+	else {
+		// just default assign
+		parseAssign();
+	}
 
 	// jump to "while" after assign
 	std::shared_ptr<JUMPToken> jumpToWhileOnInit = std::make_shared<JUMPToken>();
