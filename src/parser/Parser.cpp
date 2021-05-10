@@ -314,10 +314,12 @@ bool Parser::parseInitialization() {
 bool Parser::parseIdentDecl( const Lexer::LineToken& typeToken ) {
 	this->postfixTokens.push_back(typeToken);
 	parseIdentifier();
-	parseToken(Token::Assign);
-	auto assignToken = std::prev(_currToken);
-	parseBoolExpr();
-	this->postfixTokens.push_back(*assignToken);
+	if (_currToken->token->is(Token::Assign)) {
+		parseToken(Token::Assign);
+		auto assignToken = std::prev(_currToken);
+		parseBoolExpr();
+		this->postfixTokens.push_back(*assignToken);
+	}
 	return true;
 }
 
