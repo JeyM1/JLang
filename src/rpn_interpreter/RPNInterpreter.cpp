@@ -116,6 +116,7 @@ void RPNInterpreter::processAssign() {
 	if (lvalue.token->is_not(Token::Identifier)) {
 		throw RunTimeError{ "lvalue required as left operand of assignment" };
 	}
+
 	std::shared_ptr<IdentifierToken> lvalueToken = std::dynamic_pointer_cast<IdentifierToken>(lvalue.token);
 	lvalueToken->setActual(rvalue.token->actual(), rvalue.token->variableType());
 }
@@ -450,28 +451,28 @@ void RPNInterpreter::processBinary() {
 	case Token::Power: {
 		if (leftOp.token->variableType() == VariableType::INT
 		    && rightOp.token->variableType() == VariableType::INT) {
-			resVal.token = std::make_shared<IntConstToken>(pow(
+			resVal.token = std::make_shared<IntConstToken>(std::pow(
 				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal),
 				*std::static_pointer_cast<IntConstToken::CTYPE>(rightVal))
 			);
 		}
 		else if (leftOp.token->variableType() == VariableType::INT
 		         && rightOp.token->variableType() == VariableType::REAL) {
-			resVal.token = std::make_shared<RealConstToken>(powl(
+			resVal.token = std::make_shared<RealConstToken>(std::pow(
 				*std::static_pointer_cast<IntConstToken::CTYPE>(leftVal),
 				*std::static_pointer_cast<RealConstToken::CTYPE>(rightVal))
 			);
 		}
 		else if (leftOp.token->variableType() == VariableType::REAL
 		         && rightOp.token->variableType() == VariableType::REAL) {
-			resVal.token = std::make_shared<IntConstToken>(powl(
+			resVal.token = std::make_shared<IntConstToken>(std::pow(
 				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal),
 				*std::static_pointer_cast<RealConstToken::CTYPE>(rightVal))
 			);
 		}
 		else if (leftOp.token->variableType() == VariableType::REAL
 		         && rightOp.token->variableType() == VariableType::INT) {
-			resVal.token = std::make_shared<IntConstToken>(powl(
+			resVal.token = std::make_shared<IntConstToken>(std::pow(
 				*std::static_pointer_cast<RealConstToken::CTYPE>(leftVal),
 				*std::static_pointer_cast<IntConstToken::CTYPE>(rightVal))
 			);

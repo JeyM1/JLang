@@ -137,7 +137,6 @@ bool Parser::parseStatement() {
 		}
 		else {
 			// push init type (int, real, bool)
-//			this->postfixTokens.push_back(_currToken->token);
 			parseInitialization();
 			parseToken(Token::Semicolon);
 		}
@@ -192,17 +191,15 @@ bool Parser::parseBoolFactor() {
 		++_currToken;
 		parseBoolFactor();
 	}
-	if (_currToken->token->is(Token::LeftParen)) {
-		parseToken(Token::LeftParen);
-		parseBoolRelation();
-		std::cout << *_currToken->token << std::endl;
-		parseToken(Token::RightParen);
-	}
-	else if (_currToken->token->is_one_of(
+	if (_currToken->token->is_one_of(
 		Token::Identifier, Token::IntConst, Token::RealConst, Token::BoolConst,
-		Token::Sub
+		Token::Sub,
+		Token::LeftParen, Token::RightParen
 	)) {
 		parseBoolRelation();
+	}
+	else {
+		throw SyntaxError{ "expected expression" };
 	}
 	if (notToken) {
 		this->postfixTokens.emplace_back(*notToken);
@@ -243,6 +240,7 @@ bool Parser::parseExpression() {
 
 bool Parser::parseTerm() {
 	parseFactor();
+	std::cout << *_currToken->token << std::endl;
 	while (_currToken->token->is_one_of(Token::Multiply, Token::Division, Token::IntDivision)) {
 		auto parsedToken = _currToken;
 		++_currToken;
