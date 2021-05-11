@@ -33,7 +33,7 @@ int main() {
 	std::cout << std::endl;
 
 	RPNInterpreter interpreter{ parser.getParsedTokens(), parser.getIdentifiers() };
-	std::cout << "Program output: " << std::endl;
+	std::cout << "Program input-output: " << std::endl;
 	if (interpreter.interpret()) {
 		std::cout << "Interpreter success status: 1" << std::endl;
 	}

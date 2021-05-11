@@ -135,10 +135,17 @@ bool Parser::parseStatement() {
 		else if (_currToken->token->lexeme() == "for") {
 			parseForStatement();
 		}
-		else {
+		else if (
+			_currToken->token->lexeme() == "int" ||
+			_currToken->token->lexeme() == "real" ||
+			_currToken->token->lexeme() == "bool"
+			) {
 			// push init type (int, real, bool)
 			parseInitialization();
 			parseToken(Token::Semicolon);
+		}
+		else {
+			throw SyntaxError{ "expected \"}\"" };
 		}
 		break;
 	}
@@ -240,7 +247,6 @@ bool Parser::parseExpression() {
 
 bool Parser::parseTerm() {
 	parseFactor();
-	std::cout << *_currToken->token << std::endl;
 	while (_currToken->token->is_one_of(Token::Multiply, Token::Division, Token::IntDivision)) {
 		auto parsedToken = _currToken;
 		++_currToken;
@@ -277,7 +283,7 @@ bool Parser::parseFirstExpr() {
 	}
 	else if (_currToken->token->is(Token::LeftParen)) {
 		parseToken(Token::LeftParen);
-		parseExpression();
+		parseBoolExpr();
 		parseToken(Token::RightParen);
 	}
 	else {
