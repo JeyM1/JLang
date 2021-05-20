@@ -3,7 +3,7 @@ project(JLang)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#add_compile_definitions(_DEBUG)
+# add_compile_definitions(_DEBUG)
 
 add_executable(
         JLang
@@ -34,4 +34,10 @@ add_executable(
         src/rpn_interpreter/RPNInterpreter.h
         src/rpn_interpreter/exceptions/RunTimeError.cpp
         src/rpn_interpreter/exceptions/RunTimeError.h
-        src/rpn_interpreter/VariableType.h src/lexer/JUMPToken.cpp src/lexer/JUMPToken.h src/lexer/JFToken.cpp src/lexer/JFToken.h src/lexer/exceptions/LexerError.cpp src/lexer/exceptions/LexerError.h)
+        src/rpn_interpreter/VariableType.h
+        src/lexer/JUMPToken.cpp src/lexer/JUMPToken.h
+        src/lexer/JFToken.cpp
+        src/lexer/JFToken.h
+        src/lexer/exceptions/LexerError.cpp
+        src/lexer/exceptions/LexerError.h
+)
