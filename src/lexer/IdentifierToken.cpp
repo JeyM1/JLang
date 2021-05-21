@@ -23,8 +23,11 @@ void IdentifierToken::setVariableType( VariableType type ) {
 }
 
 std::shared_ptr<void> IdentifierToken::actual() const {
-	if (this->_variableType == UNDEFINED || !this->_actual) {
+	if (this->_variableType == UNDEFINED) {
 		throw RunTimeError{ "variable \"" + this->_lexeme + "\" is undefined." };
+	}
+	if (!this->_actual) {
+		throw RunTimeError{ "variable \"" + this->_lexeme + "\" is NULL." };
 	}
 	return _actual;
 }
