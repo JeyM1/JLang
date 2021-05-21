@@ -13,6 +13,7 @@ class JUMPToken : public Token
   public:
 	JUMPToken();
 	unsigned int jumpToIdx;
+	std::string toString() override;
 };
 
 #endif //_JUMPTOKEN_H_

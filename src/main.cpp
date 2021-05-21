@@ -28,7 +28,7 @@ int main() {
 	std::cout << "RPN of the code:" << std::endl;
 	auto rpn_tokens = parser.getParsedTokens();
 	for (const auto& token : rpn_tokens) {
-		std::cout << token.token->lexeme() << " ";
+		std::cout << token.token->toString() << " ";
 	}
 	std::cout << std::endl;
 

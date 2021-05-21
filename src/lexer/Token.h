@@ -144,6 +144,8 @@ class Token
 	static std::shared_ptr<Token> getLanguageToken( const std::string& );
 	static std::string getClosestLanguageToken( const std::string& );
 
+	virtual std::string toString() { return this->lexeme(); };
+
 	friend std::ostream& operator<<( std::ostream& os, const Token& token );
 
 };

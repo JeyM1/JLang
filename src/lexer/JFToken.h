@@ -13,6 +13,7 @@ class JFToken : public Token
   public:
 	JFToken();
 	unsigned int jumpToIdx;
+	std::string toString() override;
 };
 
 #endif //_JFTOKEN_H_

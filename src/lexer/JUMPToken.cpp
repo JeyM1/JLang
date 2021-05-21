@@ -7,3 +7,7 @@
 
 JUMPToken::JUMPToken()
 	: Token(Token::Keyword, "JUMP") {}
+
+std::string JUMPToken::toString() {
+	return Token::toString() + "(" + std::to_string(this->jumpToIdx) + ")";
+}

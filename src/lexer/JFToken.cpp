@@ -7,3 +7,7 @@
 
 JFToken::JFToken()
 	: Token(Token::Keyword, "JF") {}
+
+std::string JFToken::toString() {
+	return Token::toString() + "(" + std::to_string(this->jumpToIdx) + ")";
+}
