@@ -261,7 +261,7 @@ bool Parser::parseFactor() {
 	while (_currToken->token->is(Token::Power)) {
 		auto parsedToken = _currToken;
 		++_currToken;
-		parseFirstExpr();
+		parseFactor();
 		this->postfixTokens.push_back(*parsedToken);
 	}
 	return true;
