@@ -268,7 +268,7 @@ bool Parser::parseFactor() {
 }
 
 bool Parser::parseFirstExpr() {
-	unsigned int signLine = 0;
+	unsigned int signLine = -1;
 	// [Sign]
 	if (_currToken->token->is(Token::Sub)) {
 		signLine = _currToken->line;
@@ -289,7 +289,7 @@ bool Parser::parseFirstExpr() {
 	else {
 		throw SyntaxError{ "Expected const, ident or Expression" };
 	}
-	if (signLine > 0) {
+	if (signLine > -1) {
 		this->postfixTokens.emplace_back(signLine, std::make_shared<Token>(Token::Type::Sign, "@"));
 	}
 	return true;
