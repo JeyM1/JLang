@@ -198,7 +198,7 @@ bool Parser::parseBoolFactor() {
 		++_currToken;
 		parseBoolFactor();
 	}
-	if (_currToken->token->is_one_of(
+	else if (_currToken->token->is_one_of(
 		Token::Identifier, Token::IntConst, Token::RealConst, Token::BoolConst,
 		Token::Sub,
 		Token::LeftParen, Token::RightParen
